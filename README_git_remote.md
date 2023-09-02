@@ -1,7 +1,7 @@
 
 В powershell:
 
-```cmd
+```powershell
 gh auth login
 >>>
 gh : Имя "gh" не распознано как имя командлета, функции, файла сценария или выполняемой программы. Проверьте правильность написания имени, а также наличие и правильность пути, после чего повто
@@ -21,47 +21,48 @@ gh : Имя "gh" не распознано как имя командлета, �
     После установки GitHub CLI, убедитесь, что путь к исполняемому файлу gh добавлен в вашу переменную среды PATH. Вы можете сделать это следующим образом:
         Откройте PowerShell.
         Выполните команду для получения местоположения исполняемого файла gh:
-        ```
-        Get-Command gh
-        ```
+```powershell
+Get-Command gh
+```
         Проверьте вывод и убедитесь, что он указывает на верное местоположение исполняемого файла GitHub CLI.
 
-    После убедительного завершения шагов 1 и 2, повторите команду gh auth login, и она должна успешно открыть окно аутентификации GitHub.
+    После завершения шагов 1 и 2, повторите команду gh auth login, и она должна успешно открыть окно аутентификации GitHub.
 
 --------------------------------
 gh auth login
 
-    ```
-    ? What account do you want to log into? GitHub.com
-    ? What is your preferred protocol for Git operations? HTTPS
-    ? Authenticate Git with your GitHub credentials? Yes
-    ? How would you like to authenticate GitHub CLI? Paste an authentication token
-    Tip: you can generate a Personal Access Token here https://github.com/settings/tokens
-    The minimum required scopes are 'repo', 'read:org', 'workflow'.
-    ? Paste your authentication token:
-    X Sorry, your reply was invalid: Value is required
-    ? Paste your authentication token: *
-    - gh config set -h github.com git_protocol https
-    ✓ Configured git protocol
-    ✓ Logged in as kogriv
-    PS C:\Users\user\documents\pro\archip> gh repo create
-    ? What would you like to do? Push an existing local repository to GitHub
-    ? Path to local repository (.)
+```powershell
+? What account do you want to log into? GitHub.com
+? What is your preferred protocol for Git operations? HTTPS
+? Authenticate Git with your GitHub credentials? Yes
+? How would you like to authenticate GitHub CLI? Paste an authentication token
+Tip: you can generate a Personal Access Token here https://github.com/settings/tokens
+The minimum required scopes are 'repo', 'read:org', 'workflow'.
+? Paste your authentication token:
+X Sorry, your reply was invalid: Value is required
+? Paste your authentication token: *
+- gh config set -h github.com git_protocol https
+✓ Configured git protocol
+✓ Logged in as kogriv
+PS C:\Users\user\documents\pro\archip> gh repo create
+? What would you like to do? Push an existing local repository to GitHub
+? Path to local repository (.)
 
-    ? Path to local repository .
-    ? Repository name (archip)
+? Path to local repository .
+? Repository name (archip)
 
-    ? Repository name archip
-    ? Description sysf'one
+? Repository name archip
+? Description sysf'one
 
-    ? Description sysf'one
-    ? Visibility Public
-    ✓ Created repository kogriv/archip on GitHub
-    ? Add a remote? Yes
-    ? What should the new remote be called? (origin) master
+? Description sysf'one
+? Visibility Public
+✓ Created repository kogriv/archip on GitHub
+? Add a remote? Yes
+? What should the new remote be called? (origin) master
 
-    ? What should the new remote be called? master
-    ```
+? What should the new remote be called? master
+```
+
 Для авторизации с использованием токена, созданного ранее на GitHub, выберите протокол "HTTPS". Токен можно использовать в URL-адресе для аутентификации при выполнении операций Git через HTTPS.
 
 Authenticate Git with your GitHub credentials? (Y/n)
@@ -83,12 +84,12 @@ Authenticate Git with your GitHub credentials? (Y/n)
     Войдите в свой аккаунт GitHub через командную строку, если вы ещё этого не сделали, используя команду gh auth login и следуя инструкциям.
 
     Перейдите в локальный репозиторий, который вы хотите загрузить на GitHub, с помощью команды cd:
-```cmd
+```powershell
 cd /путь/к/вашему/репозиторию
 ```
 
     Создайте удаленный репозиторий на GitHub с помощью команды
-```cmd
+```powershell
 gh repo create:
 ```
 GitHub CLI запросит у вас название репозитория, описание и другие параметры. Вы можете ввести их или просто нажать Enter, чтобы использовать значения по умолчанию.
@@ -96,46 +97,48 @@ GitHub CLI запросит у вас название репозитория, �
 GitHub CLI создаст удаленный репозиторий на GitHub и настроит его для связи с вашим локальным репозиторием. После этого он покажет вам URL удаленного репозитория.
 
 Теперь, чтобы загрузить содержимое вашего локального репозитория на GitHub, выполните команду git push:
-    ```
-    git push origin master
-    ```
+```powershell
+git push origin master
+```
     Это отправит вашу локальную ветку master на удаленный репозиторий на GitHub. Если у вас другая ветка, замените master на имя вашей ветки.
 
 Теперь ваш локальный репозиторий успешно клонирован на GitHub, и вы можете управлять им через командную строку, не заходя на сайт GitHub.
 -----------------------------
 
 Чтобы посмотреть удаленные репозитории, привязанные к текущему локальному репозиторию с использованием Git, вы можете выполнить следующую команду в командной строке (в вашем случае в PowerShell):
-    ```
-    git remote -v
-    ```
+```powershell
+git remote -v
+```
 
     Вы увидите результат, подобный этому:
-    ```
-    origin  https://github.com/username/repo.git (fetch)
-    origin  https://github.com/username/repo.git (push)
-    ```
+```powershell
+origin  https://github.com/username/repo.git (fetch)
+origin  https://github.com/username/repo.git (push)
+```
     Здесь "origin" - это стандартное имя для удаленного репозитория, который был склонирован из исходного репозитория. У вас может быть несколько удаленных репозиториев, и вы увидите их все в этом списке, если они были добавлены к вашему локальному репозиторию.
 
 -----------------------------------
 
 имею:
+```powershell
 git remote -v
 master  https://github.com/kogriv/archip.git (fetch)
 master  https://github.com/kogriv/archip.git (push)
------
-как переименовать master в origin
+```
+
+как переименовать master в origin?
 
 Чтобы переименовать удаленный репозиторий с именем "master" на "origin", выполните следующие команды:
 
     Сначала удалите удаленный репозиторий с именем "origin" (если он уже существует), чтобы избежать конфликта имен:
-    ```
-    git remote remove origin
-    ```
+```powershell
+git remote remove origin
+```
 
     Затем переименуйте удаленный репозиторий "master" на "origin" с помощью следующей команды:
-    ```
-    git remote rename master origin
-    ```
+```powershell
+git remote rename master origin
+```
 
 Имя "origin" в контексте Git - это локальное имя, которое вы используете для ссылки на удаленный репозиторий на вашем компьютере. Это не влияет на сам удаленный репозиторий на GitHub или другом хостинге кода.
 

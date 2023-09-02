@@ -1,4 +1,6 @@
+```python
 print(globals())
+```
 вернет словарь для глоб переменных {имя:значение}
 
 --------------------
@@ -28,23 +30,23 @@ my_function()
 
 Вот пример того, как это можно сделать:
 
-    ```
-    # Модуль module_to_access.py
-    module_variable = "Hello from module_to_access"
+```python
+# Модуль module_to_access.py
+module_variable = "Hello from module_to_access"
 
-    # Скрипт, который получает доступ к переменной из другого модуля
-    def access_variable_from_another_module():
-        module_name = "module_to_access"
-        module_globals = globals()
+# Скрипт, который получает доступ к переменной из другого модуля
+def access_variable_from_another_module():
+    module_name = "module_to_access"
+    module_globals = globals()
 
-        if module_name in module_globals:
-            variable_value = module_globals[module_name].module_variable
-            print(f"Accessed variable value: {variable_value}")
-        else:
-            print(f"Module {module_name} not found in globals")
+    if module_name in module_globals:
+        variable_value = module_globals[module_name].module_variable
+        print(f"Accessed variable value: {variable_value}")
+    else:
+        print(f"Module {module_name} not found in globals")
 
-    access_variable_from_another_module()
-    ```
+access_variable_from_another_module()
+```
     В этом примере мы определили модуль module_to_access.py, содержащий глобальную переменную module_variable. Затем в другом скрипте, мы используем globals(), чтобы получить доступ к глобальным переменным модуля module_to_access.
 
     Однако следует отметить, что такой подход не является хорошей практикой и может вызвать проблемы с читаемостью и поддержкой кода. Рекомендуется использовать импорт для доступа к переменным из других модулей, так как это делает код более читаемым и предсказуемым.
