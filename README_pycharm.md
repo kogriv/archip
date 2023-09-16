@@ -1,6 +1,7 @@
 https://youtu.be/FHAoHkLArjw?si=tUscUYp53sGbsqRn
 
 ГОРЯЧИЕ КЛАВИШИ:
+
 Найти любое действие в IDE Ctrl + Shift + A
 РЕДАКТИРОВАНИЕ
 Показать действия намерения Alt + Enter
