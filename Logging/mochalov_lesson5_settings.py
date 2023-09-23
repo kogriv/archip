@@ -1,7 +1,10 @@
 import  logging
+from pprint import pprint
 
 class NewFunctionFilter(logging.Filter):
     def filter(self, record):
+        pprint(dir(record), width=60, compact=True)
+        print(record.some_variable_name)
         return record.funcName == 'new_function'
 
 logger_config = {

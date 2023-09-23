@@ -6,12 +6,14 @@ logging.config.dictConfig(logger_config)
 logger = logging.getLogger('app_logger')
 
 def new_function():
-    logger.debug('Enter in to the new_function()')
+    variable = 'variable_value'
+    logger.debug('Enter in to the new_function()',
+                 extra={'some_variable_name' : variable})
 
 def main():
     logger.debug('Enter in to the main()')
 
 
 if __name__ == '__main__':
-    main()
+    # main()
     new_function()
