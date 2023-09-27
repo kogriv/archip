@@ -347,9 +347,9 @@ logger_config = {
 }
 ```
 
-`'version' : 1` - Предписано документацией
-`'disable_existing_loggers' : False` - вкл/выкл всех существующих логгеров, кроме корневого. False - значит, что все логеры, кроме упомянутых в данном словаре, работать с настройками словаря не будут.
-`'incremental' : True` - значит, что данный конфиг является дополнительным к какому то еще (например, мы используем другую библиотеку (напр. requests), где также есть какой то конфиг)
+- `'version' : 1` - Предписано документацией
+- `'disable_existing_loggers' : False` - вкл/выкл всех существующих -логгеров, кроме корневого. False - значит, что все логеры, кроме упомянутых в данном словаре, работать с настройками словаря не будут.
+- `'incremental' : True` - значит, что данный конфиг является дополнительным к какому то еще (например, мы используем другую библиотеку (напр. requests), где также есть какой то конфиг)
 
 Пример конфига `logger_settings.py`
 ```python
@@ -462,11 +462,11 @@ class NewFunctionFilter(logging.Filter):
         }
     },
 ```
-В данном случае класс NewFunctionFilter находится в том же модуле, что и словарь с конфигурацией. При расположении класса например в модуле filters.py, его надо было бы импортировать `import filters`, данная инструкция выглядела бы как `'()' : filters.NewFunctionFilter`
+В данном случае класс NewFunctionFilter находится в том же модуле, что и словарь с конфигурацией. При расположении класса например в модуле filters.py, его надо импортировать `import filters`. Тогда инструкция выглядела бы так: `'()' : filters.NewFunctionFilter`
 
-С именем new_filter нужно связать объект класса `NewFunctionFilter`. Для этого в качестве ключа указываются круглые скобки. Это специальный формат, который говорит модулю loggingб что надо создать экземпляр определенного класса.
+С именем new_filter нужно связать объект класса `NewFunctionFilter`. Для этого в качестве ключа указываются круглые скобки. Это специальный формат, который говорит модулю logging, что надо создать экземпляр определенного класса.
 
-После этого к обработчику добавляется (привязывается) данный фильтр:
+После этого к обработчику добавляется (привязывается) данный фильтр (список):
 ```python
 'handlers' : {
         'console' : {
@@ -484,3 +484,70 @@ class NewFunctionFilter(logging.Filter):
     def filter(self, record):
         return record.funcName == 'new_function'
 ```
+
+## Дополнительные параметры сообщения
+В вызывающем методе используется параметр `extra`
+```python
+def new_function():
+    variable = 'variable_value'
+    logger.debug('Enter in to the new_function()',
+                 extra={'some_variable_name' : variable})
+```
+При таком создании объекта ЛогРекорд, в списке его аттрибутов появится имя `some_variable_name`. К этому имени можно обратиться для получения значения. На примере класса фильтра:
+```python
+class NewFunctionFilter(logging.Filter):
+    def filter(self, record):
+        pprint(dir(record), width=60, compact=True)
+        print(record.some_variable_name)
+        return record.funcName == 'new_function'
+```
+Получим вывод `variable_value`.
+
+## Создание обработчика
+Создание класса на основе `logging.Handler`. Метод `emit()` не определен в базовом классе, предполагается его реализация в наследниках.
+Метод `emit()` получает на вход объект ЛогРекорд. После этого объект можно преобразовать стандартным методом базового обработчика `self.format(record)`. И далее в методе `emit()` реализуется какая то кастомная работа с полученной из объекта ЛогРекорд строкой. Например запись в файл или отправка в мессенджер.
+
+Пример для записи в файл:
+```python
+class MegaHandler(logging.Handler):
+    def __init__(self, filename):
+        # Инициализация класса Handler
+        logging.Handler.__init__(self)
+        self.filename = filename
+
+    # Реализация метода emit()
+    def emit(self, record):
+        message = self.format(record)
+        with open(self.filename, 'w') as file:
+            file.write(message + '\n')
+```
+
+После этого в словаре-конфиге необходимо добавить пару для созданного кастомного обработчика.
+```python
+'handlers' : {
+        'console' : {
+            'class' : 'logging.StreamHandler',
+            'level' : 'DEBUG',
+            'formatter' : 'std_format'
+        },
+        'file' : {
+            '()' : MegaHandler,
+            'level' : 'DEBUG',
+            'filename' : 'mochalov_lesson6_debug.log',
+            'formatter' : 'std_format'
+        }
+    }
+```
+Опять - как и для кастомного форматировщика в качестве ключа передаем `'()'`.
+
+Также надо добавить новый обработчик к логгеру:
+```python
+'loggers' : {
+        'app_logger' : {
+            'level' : 'DEBUG',
+            'handlers' : ['console', 'file'],
+            # 'propagate' : False
+        }
+    }
+```
+
