@@ -116,5 +116,109 @@
 # gr.show_table()
 
 # 7
-class CPU:
-    pass
+# класс для описания процессоров
+# from typing import List
+# class CPU:
+#
+#     def __init__(self, name, fr):
+#         self.name = name
+#         self.fr = fr
+#
+# # класс для описания памяти
+# class Memory:
+#     def __init__(self, name, volume):
+#         self.name = name
+#         self.volume = volume
+#
+# # класс для описания материнских плат
+# class MotherBoard:
+#     def __init__(self, name, cpu: CPU, *mems):
+#         self.name = name
+#         self.cpu = cpu
+#         self.total_mem_slots = 4
+#         self.mem_slots = mems[:self.total_mem_slots]
+#
+#     def get_config(self):
+#         return [
+# f'Материнская плата: {self.name}',
+# f'Центральный процессор: {self.cpu.name}, {self.cpu.fr}',
+# f'Слотов памяти: {self.total_mem_slots}',
+# 'Память: ' + '; '.join(map(lambda x: f'{x.name} - {x.volume}',
+#                            self.mem_slots))
+#         ]
+#
+# mb = MotherBoard('RX9',CPU('Ryz0',1000),
+#                  Memory('Kig',2000),
+#                  Memory('WD',8000))
+
+# 8
+# class Table:
+#     def __init__(self, name, price):
+#         self.name = name
+#         self.price = price
+#
+# class TV:
+#     def __init__(self, name, price):
+#         self.name = name
+#         self.price = price
+#
+# class Notebook:
+#     def __init__(self, name, price):
+#         self.name = name
+#         self.price = price
+#
+# class Cup:
+#     def __init__(self, name, price):
+#         self.name = name
+#         self.price = price
+#
+# class Cart:
+#     def __init__(self):
+#         self.goods = []
+#
+#     # добавление в корзину товара, представленного объектом gd
+#     def add(self, gd):
+#         self.goods.append(gd)
+#
+#     # удаление из корзины товара по индексу index
+#     def remove(self, indx):
+#         self.goods.pop(indx)
+#
+#     # получение из корзины товаров в виде списка из строк
+#     def get_list(self):
+#         return [f'{x.name}: {x.price}' for x in self.goods]
+#
+# cart = Cart()
+# cart.add(TV('sam',1000))
+# cart.add(TV('son',1100))
+# cart.add(Table('duk',100))
+# cart.add(Notebook('dell',1000))
+# cart.add(Notebook('len',1000))
+# cart.add(Cup('coboyashi',10))
+
+# 9
+# Односвязный список
+import sys
+class ListObject:
+    def __init__(self, data):
+        self.data = data
+        self.next_obj = None
+
+    # для присоединения объекта obj такого
+    # же класса к текущему объекту self
+    def link(self, obj):
+        self.next_obj = obj
+
+# считывание списка из входного потока
+# (эту строкуне менять)
+lst_in = list(map(str.strip, sys.stdin.readlines())) # список lst_in в программе не менять
+
+# На первый добавленный объект класса ListObject
+# должна ссылаться переменная head_obj
+# первая строка в первом объекте
+head_obj = ListObject(lst_in[0])
+obj = head_obj
+for i in range(1, len(lst_in)):
+    obj_new = ListObject(lst_in[i])
+    obj.link(obj_new)
+    obj = obj_new
