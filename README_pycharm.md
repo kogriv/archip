@@ -1,6 +1,7 @@
 https://youtu.be/FHAoHkLArjw?si=tUscUYp53sGbsqRn
 
 ГОРЯЧИЕ КЛАВИШИ:
+- Скролл (курсор остается не месте): Ctrl + стрелки вверх/вниз
 
 - Найти любое действие в IDE: Ctrl + Shift + A
 ##  РЕДАКТИРОВАНИЕ
