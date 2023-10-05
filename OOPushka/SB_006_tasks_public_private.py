@@ -413,9 +413,160 @@
 #
 # P.S. На экран ничего выводить не нужно.
 
-class LinkedList:
+# class ObjList:
+#     def __init__(self, data):
+#         self.__data = data
+#         self.__next = self.__prev = None
+#
+#     # изменение приватного свойства __next на значение obj;
+#     def set_next(self, obj):
+#         self.__next = obj
+#
+#     # изменение приватного свойства __prev на значение obj;
+#     def set_prev(self, obj):
+#         self.__prev = obj
+#
+#     # получение значения приватного свойства __next;
+#     def get_next(self):
+#         return self.__next
+#
+#     # получение значения приватного свойства __prev;
+#     def get_prev(self):
+#         return self.__prev
+#
+#     # изменение приватного свойства __data на значение data;
+#     def set_data(self, data):
+#         self.__data = data
+#
+#     # получение значения приватного свойства __data.
+#     def get_data(self):
+#         return self.__data
+#
+# class LinkedList:
+#     def __init__(self):
+#         self.head = None
+#         self.tail = None
+#
+#     def add_obj(self, obj):
+#         if self.tail:
+#             self.tail.set_next(obj)
+#         obj.set_prev(self.tail)
+#         self.tail = obj
+#         if not self.head:
+#             self.head = obj
+#
+#     def remove_obj(self):
+#         if self.tail is None:
+#             return
+#
+#         prev = self.tail.get_prev()
+#         if prev:
+#             prev.set_next(None)
+#         self.tail = prev
+#         if self.tail is None:
+#             self.head = None
+#
+#     def get_data(self):
+#         s = []
+#         h = self.head
+#         while h:
+#             s.append(h.get_data())
+#             h = h.get_next()
+#         return s
+
+# 10
+# Объявите класс EmailValidator для проверки
+# корректности email-адреса. Необходимо
+# запретить создание объектов этого класса:
+# при создании экземпляров должно возвращаться
+# значение None, например:
+#
+# em = EmailValidator() # None
+#
+# В самом классе реализовать следующие методы
+# класса (@classmethod):
+#
+# get_random_email(cls) - для генерации случайного
+#   email-адреса по формату: xxxxxxx...xxx@gmail.com,
+#   где x - любой допустимый символ в email (латинский
+#   буквы, цифры, символ подчеркивания и точка);
+# check_email(cls, email) - возвращает True, если
+#   email записан верно и False - в противном случае.
+#
+# Корректность строки email определяется по
+# следующим критериям:
+#
+# - допустимые символы: латинский алфавит, цифры,
+#   символы подчеркивания, точки и собачка @ (одна);
+# - длина email до символа @ не должна превышать
+#   100 (сто включительно);
+# - длина email после символа @ не должна быть
+#   больше 50 (включительно);
+# - после символа @ обязательно должна идти
+#   хотя бы одна точка;
+# - не должно быть двух точек подряд.
+#
+# Также в классе нужно реализовать приватный
+# статический метод класса:
+#
+# is_email_str(email) - для проверки типа переменной
+# email, если строка, то возвращается значение True,
+# иначе - False.
+#
+# Метод is_email_str() следует использовать в методе
+# check_email() перед проверкой корректности email.
+# Если параметр email не является строкой,
+# то check_email() возвращает False.
+#
+# Пример использования класса EmailValidator
+# (эти строчки в программе писать не нужно):
+#
+# res = EmailValidator.check_email("sc_lib@list.ru") # True
+# res = EmailValidator.check_email("sc_lib@list_ru") # False
+#
+# P.S. В программе требуется объявить только класс.
+# На экран ничего выводить не нужно.
+
+from random import randint
+from string import ascii_lowercase, digits, ascii_uppercase
+
+class EmailValidator:
+    EMAIL_CHARS = ascii_uppercase +ascii_lowercase + digits + "_.@"
+    EMAIL_RANDOM_CHARS = ascii_uppercase + ascii_lowercase + digits + "_"
+    def __new__(cls, *args, **kwargs):
+        return None
+
+    @staticmethod
+    def __is_email_str(email):
+        return type(email) == str
+
+    @classmethod
+    def check_email(cls, email):
+        if not cls.__is_email_str(email):
+            return False
+
+        if not set(email) < set(cls.EMAIL_CHARS):
+            return False
+
+        # проверка, что @ одна
+        s = email.split('@')
+        if len(s) != 2:
+            return False
+        if len(s[0]) > 100 or len(s[1]) >50:
+            return False
+        if '.' not in s[1]:
+            return False
+        if email.count('..'):
+            return False
+        return True
+
+    @classmethod
+    def get_random_email(cls):
+        n = randint(4, 20)
+        length = len(cls.EMAIL_RANDOM_CHARS) - 1
+        return ''.join(
+        cls.EMAIL_RANDOM_CHARS[randint(0, length)] for i in range(n)) +\
+        '@gmail.com'
 
 
-    def add_obj(self, obj):
-        ...
 
