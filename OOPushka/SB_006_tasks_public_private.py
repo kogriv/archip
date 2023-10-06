@@ -527,46 +527,47 @@
 # P.S. В программе требуется объявить только класс.
 # На экран ничего выводить не нужно.
 
-from random import randint
-from string import ascii_lowercase, digits, ascii_uppercase
+# from random import randint
+# from string import ascii_lowercase, digits, ascii_uppercase
+#
+# class EmailValidator:
+#     EMAIL_CHARS = ascii_uppercase +ascii_lowercase + digits + "_.@"
+#     EMAIL_RANDOM_CHARS = ascii_uppercase + ascii_lowercase + digits + "_"
+#     def __new__(cls, *args, **kwargs):
+#         return None
+#
+#     @staticmethod
+#     def __is_email_str(email):
+#         return type(email) == str
+#
+#     @classmethod
+#     def check_email(cls, email):
+#         if not cls.__is_email_str(email):
+#             return False
+#
+#         if not set(email) < set(cls.EMAIL_CHARS):
+#             return False
+#
+#         # проверка, что @ одна
+#         s = email.split('@')
+#         if len(s) != 2:
+#             return False
+#         if len(s[0]) > 100 or len(s[1]) >50:
+#             return False
+#         if '.' not in s[1]:
+#             return False
+#         if email.count('..'):
+#             return False
+#         return True
+#
+#     @classmethod
+#     def get_random_email(cls):
+#         n = randint(4, 20)
+#         length = len(cls.EMAIL_RANDOM_CHARS) - 1
+#         return ''.join(
+#         cls.EMAIL_RANDOM_CHARS[randint(0, length)] for i in range(n)) +\
+#         '@gmail.com'
 
-class EmailValidator:
-    EMAIL_CHARS = ascii_uppercase +ascii_lowercase + digits + "_.@"
-    EMAIL_RANDOM_CHARS = ascii_uppercase + ascii_lowercase + digits + "_"
-    def __new__(cls, *args, **kwargs):
-        return None
-
-    @staticmethod
-    def __is_email_str(email):
-        return type(email) == str
-
-    @classmethod
-    def check_email(cls, email):
-        if not cls.__is_email_str(email):
-            return False
-
-        if not set(email) < set(cls.EMAIL_CHARS):
-            return False
-
-        # проверка, что @ одна
-        s = email.split('@')
-        if len(s) != 2:
-            return False
-        if len(s[0]) > 100 or len(s[1]) >50:
-            return False
-        if '.' not in s[1]:
-            return False
-        if email.count('..'):
-            return False
-        return True
-
-    @classmethod
-    def get_random_email(cls):
-        n = randint(4, 20)
-        length = len(cls.EMAIL_RANDOM_CHARS) - 1
-        return ''.join(
-        cls.EMAIL_RANDOM_CHARS[randint(0, length)] for i in range(n)) +\
-        '@gmail.com'
 
 
 
