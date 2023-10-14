@@ -682,16 +682,221 @@
 # только класс Dimensions.
 # На экран ничего выводить не нужно.
 
-class Dimensions:
-    def __init__(self, a, b, c):
-        self.__a = self.__b = self.__c = None
-        self.a = a
-        self.b = b
-        self.c = c
+# class Dimensions:
+#     MIN_DIMENSION = 10
+#     MAX_DIMENSION = 1000
+#     def __init__(self, a, b, c):
+#         self.__a = self.__b = self.__c = None
+#         self.a = a
+#         self.b = b
+#         self.c = c
+#
+#     @classmethod
+#     def __value_is_valid(cls,value):
+#         return type(value) in (int, float) and \
+#             cls.MIN_DIMENSION <= value <= cls.MAX_DIMENSION
+#
+#
+#     @property
+#     def a(self):
+#         return self.__a
+#     @a.setter
+#     def a(self, value):
+#         if self.__value_is_valid(value):
+#             self.__a = value
+#
+#     @property
+#     def b(self):
+#         return self.__b
+#     @b.setter
+#     def b(self, value):
+#         if self.__value_is_valid(value):
+#             self.__b = value
+#
+#     @property
+#     def c(self):
+#         return self.__c
+#     @c.setter
+#     def c(self, value):
+#         if self.__value_is_valid(value):
+#             self.__c = value
+#
+#     def __setattr__(self, key, value):
+#         if key in ('MIN_DIMENSION', 'MAX_DIMENSION'):
+#             raise AttributeError("Менять атрибуты "+ \
+#             "MIN_DIMENSION и MAX_DIMENSION запрещено.")
+#         super().__setattr__(key,value)
+#
+#
+# d = Dimensions(10.5, 20.1, 30)
+# d.a = 8
+# d.b = 15
+# a, b, c = d.a, d.b, d.c  # a=10.5, b=15, c=30
+# d.MAX_DIMENSION = 10  # исключение AttributeError
 
-    @property
-    def a(self):
-        return self.__a
-    @a.setter
-    def a(self, value):
-        ...
+# 10
+# Объявите класс GeyserClassic - фильтр для
+# очистки воды. В этом классе должно быть
+# три слота для фильтров. Каждый слот строго
+# для своего класса фильтра:
+#
+# Mechanical - для очистки от крупных
+#              механических частиц;
+# Aragon - для последующей очистки воды;
+# Calcium - для обработки воды на третьем этапе.
+# Объекты классов фильтров должны
+# создаваться командами:
+#
+# filter_1 = Mechanical(дата установки)
+# filter_2 = Aragon(дата установки)
+# filter_3 = Calcium(дата установки)
+#
+# Во всех объектах этих классов должен
+# формироваться локальный атрибут:
+#
+# date - дата установки фильтров
+# (для простоты - положительное
+# вещественное число).
+#
+# Также нужно запретить изменение
+# этого атрибута после создания
+# объектов этих классов (только чтение).
+# В случае присвоения нового значения,
+# прежнее значение не менять.
+# Ошибок никаких не генерировать.
+#
+# Объекты класса GeyserClassic
+# должны создаваться командой:
+#
+# g = GeyserClassic()
+#
+# А сам класс иметь атрибут:
+#
+# MAX_DATE_FILTER = 100 - максимальное
+#   время работы фильтра (любого)
+#
+# и следующие методы:
+#
+# add_filter(self, slot_num, filter) - добавление
+#   фильтра filter в указанный слот slot_num
+#   (номер слота: 1, 2 и 3), если он (слот)
+#   пустой (без фильтра). Также здесь следует
+#   проверять, что в первый слот можно
+#   установить только объекты класса Mechanical,
+#   во второй - объекты класса Aragon
+#   и в третий - объекты класса Calcium.
+#   Иначе слот должен оставаться пустым.
+#
+# remove_filter(self, slot_num) - извлечение
+#   фильтра из указанного слота (slot_num: 1, 2, и 3);
+#
+# get_filters(self) - возвращает кортеж из набора
+#   трех фильтров в порядке их установки
+#   (по возрастанию номеров слотов);
+#
+# water_on(self) - включение воды: возвращает
+# True, если вода течет и False -
+# в противном случае.
+#
+# Метод water_on() должен возвращать значение
+# True при выполнении следующих условий:
+#
+# - все три фильтра установлены в слотах;
+# - все фильтры работают в пределах срока
+# службы (значение (time.time() - date)
+# должно быть в пределах [0; MAX_DATE_FILTER])
+#
+# Пример использования классов
+# (эти строчки в программе писать не нужно):
+#
+# my_water = GeyserClassic()
+# my_water.add_filter(1, Mechanical(time.time()))
+# my_water.add_filter(2, Aragon(time.time()))
+# w = my_water.water_on() # False
+# my_water.add_filter(3, Calcium(time.time()))
+# w = my_water.water_on() # True
+# f1, f2, f3 = my_water.get_filters()  # f1, f2, f3 - ссылки на соответствующие объекты классов фильтров
+# my_water.add_filter(3, Calcium(time.time())) # повторное добавление в занятый слот невозможно
+# my_water.add_filter(2, Calcium(time.time())) # добавление в "чужой" слот также невозможно
+#
+# P.S. На экран ничего выводить не нужно.
+
+import time
+
+class GeyserClassic:
+    MAX_DATE_FILTER = 100
+
+    def __init__(self):
+        self.filter_class = ('Mechanical','Aragon','Calcium')
+        self.filters = {(1, self.filter_class[0]):None,
+                        (2, self.filter_class[1]):None,
+                        (3, self.filter_class[2]):None}
+
+    def add_filter(self, slot_num, filter):
+        # формируем кортеж типа (1, 'Mechanical')
+        # на основании имени класса переданного объекта
+        key = (slot_num, filter.__class__.__name__)
+        if key in self.filters and not self.filters[key]:
+            self.filters[key] = filter
+
+    def remove_filter(self, slot_num):
+        if type(slot_num) == int and 1<=slot_num<=3:
+            key = (slot_num, self.filter_class[slot_num-1])
+            if key in self.filters:
+                self.filters[key] = None
+
+    def get_filters(self):
+        return tuple(self.filters.values())
+
+    def water_on(self):
+        end = time.time()
+        for f in self.filters.values():
+            # print('slot val:',f)
+            if f is None:
+                return False
+            start = f.date
+            if end - start > self.MAX_DATE_FILTER:
+                return False
+        return True
+
+class Mechanical:
+    def __init__(self, date):
+        self.date = date
+
+    def __setattr__(self, key, value):
+        if key == 'date' and key in self.__dict__:
+            return
+        super().__setattr__(key,value)
+
+class Aragon:
+    def __init__(self, date):
+        self.date = date
+
+    def __setattr__(self, key, value):
+        if key == 'date' and key in self.__dict__:
+            return
+        super().__setattr__(key,value)
+
+class Calcium:
+    def __init__(self, date):
+        self.date = date
+
+    def __setattr__(self, key, value):
+        if key == 'date' and key in self.__dict__:
+            return
+        super().__setattr__(key,value)
+
+my_water = GeyserClassic()
+my_water.add_filter(1, Mechanical(time.time()))
+my_water.add_filter(2, Aragon(time.time()))
+w = my_water.water_on() # False
+print('after 1 + 2 - ',w)
+my_water.add_filter(3, Calcium(time.time()))
+w = my_water.water_on() # True
+print('after 1 + 2 + 3 - ',w)
+f1, f2, f3 = my_water.get_filters()  # f1, f2, f3 - ссылки на соответствующие объекты классов фильтров
+print('filters')
+print(f1, f2, f3)
+my_water.add_filter(3, Calcium(time.time())) # повторное добавление в занятый слот невозможно
+my_water.add_filter(2, Calcium(time.time())) # добавление в "чужой" слот также невозможно
+#
