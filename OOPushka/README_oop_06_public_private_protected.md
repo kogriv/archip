@@ -106,3 +106,4 @@ from accessify import private, protected
         return type(x) in (int, float)
 '''
 Все, теперь мы можем обратиться к check_value только внутри класса, но не извне.
+
