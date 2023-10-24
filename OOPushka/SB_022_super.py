@@ -241,7 +241,7 @@
 #     def get_objects(self):
 #         return self.objects
 
-# 6 аша команда создает небольшой фреймворк
+# 6 Ваша команда создает небольшой фреймворк
 # для веб-сервера. Для этого был объявлен класс:
 #
 # class Router:
@@ -377,3 +377,219 @@
 # P.S. В программе нужно объявить
 # только класс. На экран выводить
 # ничего не нужно.
+
+# 7
+# В программе объявлена функция
+# integer_params для класса Vector,
+# которая применяет к каждому методу
+# класса декоратор
+# integer_params_decorated:
+#
+# def integer_params(cls):
+#     methods = {k: v for k, v in cls.__dict__.items() if callable(v)}
+#     for k, v in methods.items():
+#         setattr(cls, k, integer_params_decorated(v))
+#
+#     return cls
+#
+#
+# @integer_params
+# class Vector:
+#     def __init__(self, *args):
+#         self.__coords = list(args)
+#
+#     def __getitem__(self, item):
+#         return self.__coords[item]
+#
+#     def __setitem__(self, key, value):
+#         self.__coords[key] = value
+#
+#     def set_coords(self, *coords, reverse=False):
+#         c = list(coords)
+#         self.__coords = c if not reverse else c[::-1]
+#
+# Декоратор integer_params_decorated
+# должен проверять, чтобы все передаваемые
+# аргументы в методы класса (кроме первого self)
+# были целыми числами (имели тип int).
+# Если это не так, то должно генерироваться
+# исключение командой:
+#
+# raise TypeError("аргументы должны быть
+# целыми числами")
+#
+# Ваша задача объявить эту функцию-декоратор.
+#
+# Пример использования класса (эти строчки
+# в программе не писать):
+#
+# vector = Vector(1, 2)
+# print(vector[1])
+# vector[1] = 20.4 # TypeError
+#
+# P.S. В программе нужно объявить
+# только класс. На экран выводить
+# ничего не нужно.
+
+# def integer_params_decorated(func):
+#     def wrapper(self, *args, **kwargs):
+#         for arg in args:
+#             if type(arg) != int:
+#                 raise TypeError("аргументы должны быть целыми числами")
+#         for kwarg in kwargs.values():
+#             if type(kwarg) != int:
+#                 raise TypeError("аргументы должны быть целыми числами")
+#         return func(self, *args, **kwargs)
+#     return wrapper
+#
+# def integer_params(cls):
+#     methods = {k: v for k, v in cls.__dict__.items() if callable(v)}
+#     for k, v in methods.items():
+#         setattr(cls, k, integer_params_decorated(v))
+#
+#     return cls
+#
+#
+# @integer_params
+# class Vector:
+#     def __init__(self, *args):
+#         self.__coords = list(args)
+#
+#     def __getitem__(self, item):
+#         return self.__coords[item]
+#
+#     def __setitem__(self, key, value):
+#         self.__coords[key] = value
+#
+#     def set_coords(self, *coords, reverse=False):
+#         c = list(coords)
+#         self.__coords = c if not reverse else c[::-1]
+
+# 8
+# Объявите класс SoftList, который
+# наследуется от стандартного класса list.
+# В классе SoftList следует объявить необходимые
+# магические методы так, чтобы при обращении
+# к несуществующему элементу (по индексу)
+# возвращалось значение False (а не
+# исключение Out of Range). Например:
+#
+# sl = SoftList("python")
+# sl[0] # 'p'
+# sl[-1] # 'n'
+# sl[6] # False
+# sl[-7] # False
+#
+# P.S. В программе нужно объявить
+# только класс. На экран выводить
+# ничего не нужно.
+#
+# class SoftList(list):
+#     def __getitem__(self, index):
+#         try:
+#             return super().__getitem__(index)
+#         except IndexError:
+#             return False
+
+# 9
+# Объявите класс StringDigit, который
+# наследуется от стандартного класса str.
+# Объекты класса StringDigit должны
+# создаваться командой:
+#
+# sd = StringDigit(string)
+#
+# где string - строка из цифр
+# (например, "12455752345950"). Если в строке
+# string окажется хотя бы один не цифровой
+# символ, то генерировать исключение командой:
+#
+# raise ValueError("в строке должны быть только цифры")
+#
+# Также в классе StringDigit нужно переопределить
+# оператор + (конкатенации строк) так, чтобы операции:
+#
+# sd = sd + "123"
+# sd = "123" + sd
+#
+# создавали новые объекты класса StringDigit
+# (а не класса str). Если же при соединении
+# строк появляется не цифровой символ,
+# то генерировать исключение:
+#
+# raise ValueError("в строке должны быть только цифры")
+#
+# Пример использования класса
+# (эти строчки в программе не писать):
+#
+# sd = StringDigit("123")
+# print(sd)       # 123
+# sd = sd + "456" # StringDigit: 123456
+# sd = "789" + sd # StringDigit: 789123456
+# sd = sd + "12f" # ValueError
+#
+# P.S. В программе нужно объявить
+# только класс. На экран выводить
+# ничего не нужно.
+
+# class StringDigit(str):
+#     def __new__(cls, string):
+#         if not string.isdigit():
+#             raise ValueError("в строке должны быть только цифры")
+#         return super(StringDigit, cls).__new__(cls, string)
+#
+#     def __add__(self, other):
+#         if not isinstance(other, str) or not other.isdigit():
+#             raise ValueError("в строке должны быть только цифры")
+#         return StringDigit(super().__add__(other))
+#
+#     def __radd__(self, other):
+#         if not isinstance(other, str) or not other.isdigit():
+#             raise ValueError("в строке должны быть только цифры")
+#         return StringDigit(other + str(self))
+
+# 10
+#  Объявите базовый класс с именем ItemAttrs,
+#  который бы позволял обращаться к локальным
+#  атрибутам объектов дочерних классов по индексу.
+#  Для этого в классе ItemAttrs нужно переопределить
+#  следующие методы:
+#
+# __getitem__() - для получения значения атрибута по индексу;
+# __setitem__() - для изменения значения атрибута по индексу.
+#
+# Объявите дочерний класс Point для представления
+# координаты точки на плоскости. Объекты этого
+# класса должны создаваться командой:
+#
+# pt = Point(x, y)
+#
+# где x, y - целые или вещественные числа.
+#
+# Пример использования классов
+# (эти строчки в программе не писать):
+#
+# pt = Point(1, 2.5)
+# x = pt[0]   # 1
+# y = pt[1]   # 2.5
+# pt[0] = 10
+#
+# P.S. В программе нужно объявить
+# только классы. На экран
+# выводить ничего не нужно.
+#
+# class ItemAttrs:
+#     def __getitem__(self, index):
+#         keys = list(self.__dict__.keys())
+#         return getattr(self, keys[index])
+#
+#     def __setitem__(self, index, value):
+#         keys = list(self.__dict__.keys())
+#         setattr(self, keys[index], value)
+#
+#
+# class Point(ItemAttrs):
+#     def __init__(self, x, y):
+#         self.x = x
+#         self.y = y
+
