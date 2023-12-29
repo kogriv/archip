@@ -69,6 +69,23 @@ logger.setLevel('DEBUG') # 10 / logging.DEBUG
 ```python
 print(logger.handlers)
 ```
+Важно!  
+Дефолтный обработчик автоматически выводит сообщения в консоль. Однако для его активации необходимо явно вызвать `logging.basicConfig()` до того, как будет использован логгер.  
+Без использования `logging.basicConfig(level=logging.DEBUG)` (с явным указанием соответствующего уровня), даже если попытаться установить уровень инструкцией `logger.setLevel('DEBUG')`, мы все-равно получим логгер с уровнем по умолчанию `WARNING`
+
+Т.е. такой код:
+```python
+import logging
+logger = logging.getLogger()
+logger.setLevel('DEBUG')
+logger.debug('test logrecord DEBUG')
+logger.warning('test logrecord WARNING')
+```
+выведет в консоль только:
+```cmd
+test logrecord WARNING
+```
+т.к. обработкчик все-равно настроен на дефолтный уровень `WARNING`
 
 ## Обработчик базовый
 Для несконфигурированного рут-логера (полученного инструкцией `logging.getLogger()`) создается обработчик класса `StreamHandler()` с уровнем `WARNING`.

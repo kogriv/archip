@@ -20,7 +20,7 @@ child_logger.propagate = True
 # Уровень журналирования наследуемого логгера будет унаследован от родительского
 effective_level = child_logger.getEffectiveLevel()
 #
-print("Effective Level for child_logger: {effective_level}")
+print(f"Effective Level for child_logger: {effective_level}")
 
 effective_level = parent_logger.getEffectiveLevel()
 print(f"Effective Level for parent_logger: {effective_level}")
