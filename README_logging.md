@@ -111,6 +111,20 @@ logging.basicConfig(level='DEBUG')
 - обработчики `[<StreamHandler <stderr> (NOTSET)>]` - <Пишем в консоль> <Канал> <Уровень>
 - дефолтный формат сообщения: `DEBUG:root:<Some_massage>`
 
+```python
+import logging
+logging.basicConfig()
+logger = logging.getLogger()
+logger.setLevel('DEBUG')
+logger.debug('test logrecord DEBUG')
+logger.warning('test logrecord WARNING')
+```
+\>\>\>
+```cmd
+DEBUG:root:test logrecord DEBUG
+WARNING:root:test logrecord WARNING
+```
+
 `.basicConfig` - проверяет у рутового логера наличие закрепленных за ним обработчиков (используя `.handlers`). Если обработчиков нет, то метод создает обработчик класса `StreamHandler` и закрепляет его за объектом рут-логер (присваивает его в аттрибутах `.handlers`). По дефолту у такого обработчика устананавливается уровень `NOTSET`
 
 ## Запись в файл
