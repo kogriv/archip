@@ -202,3 +202,38 @@ Markdown не позволяет изменять цвет текста, но е
 \! ----- восклицательный знак (exclamation mark)  
 \| ----- вертикальная черта (pipe)  
 
+## Таблица
+Разделение столбцов - вертикальной чертой (трубой - `|`).  
+Строка-разделитель заголовков: `|---|---|---|`. Количество символов `-` в строке разделителя заголовка таблицы в Markdown не имеет строгого значения, но должно быть как минимум три `-` на столбец. 
+
+Пример:
+```cmd
+| Описание команды | Пример для Conda | Пример для Venv |
+|------------------|------------------|-----------------|
+| Создание нового окружения | `conda create --name myenv` | `python -m venv myenv` |
+| Активация окружения | `conda activate myenv` | `source myenv/bin/activate` (Unix)<br>`myenv\Scripts\activate` (Windows) |
+| Деактивация окружения | `conda deactivate` | `deactivate` |
+| Установка пакета в окружение | `conda install -n myenv numpy` | `(myenv) pip install numpy` |
+| Список установленных пакетов | `conda list -n myenv` | `(myenv) pip list` |
+| Экспорт списка зависимостей | `conda list -n myenv --export` | `(myenv) pip freeze` |
+| Создание копии окружения | `conda create --name newenv --clone myenv` | Не применимо для venv; клонирование делается вручную |
+| Удаление окружения | `conda remove --name myenv --all` | Удаление папки myenv |
+| Проверка установки менеджера окружений | `conda --version` или `conda info` | `python -m venv --help` (venv встроен в Python, так что отдельная проверка установки не требуется) |
+| Просмотр версии менеджера окружений | `conda --version` | Для venv применимо Python версии: `python --version` |
+| Проверка активации окружения | `echo $CONDA_DEFAULT_ENV` (Unix)<br>`echo %CONDA_DEFAULT_ENV%` (Windows) | `echo $VIRTUAL_ENV` (Unix)<br>`echo %VIRTUAL_ENV%` (Windows) |
+```
+
+Результат:  
+| Описание команды | Пример для Conda | Пример для Venv |
+|------------------|------------------|-----------------|
+| Создание нового окружения | `conda create --name myenv` | `python -m venv myenv` |
+| Активация окружения | `conda activate myenv` | `source myenv/bin/activate` (Unix)<br>`myenv\Scripts\activate` (Windows) |
+| Деактивация окружения | `conda deactivate` | `deactivate` |
+| Установка пакета в окружение | `conda install -n myenv numpy` | `(myenv) pip install numpy` |
+| Список установленных пакетов | `conda list -n myenv` | `(myenv) pip list` |
+| Экспорт списка зависимостей | `conda list -n myenv --export` | `(myenv) pip freeze` |
+| Создание копии окружения | `conda create --name newenv --clone myenv` | Не применимо для venv; клонирование делается вручную |
+| Удаление окружения | `conda remove --name myenv --all` | Удаление папки myenv |
+| Проверка установки менеджера окружений | `conda --version` или `conda info` | `python -m venv --help` (venv встроен в Python, так что отдельная проверка установки не требуется) |
+| Просмотр версии менеджера окружений | `conda --version` | Для venv применимо Python версии: `python --version` |
+| Проверка активации окружения | `echo $CONDA_DEFAULT_ENV` (Unix)<br>`echo %CONDA_DEFAULT_ENV%` (Windows) | `echo $VIRTUAL_ENV` (Unix)<br>`echo %VIRTUAL_ENV%` (Windows) |
