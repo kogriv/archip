@@ -362,14 +362,12 @@ echo $PYTHONPATH
 **Для Windows:**  
 Откройте командную строку (cmd) и введите:
 ```cmd
-Copy code
 echo %PYTHONPATH%
 ```
 **Использование Python:**  
 Независимо от операционной системы, вы также можете проверить PYTHONPATH непосредственно из Python:
 
 ```python
-Copy code
 import os
 print(os.environ.get('PYTHONPATH'))
 ```
