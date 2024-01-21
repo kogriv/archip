@@ -420,3 +420,44 @@ PATH (переменная PATH):
 
 -----------------------
 
+## Список ВО: Conda env list --json
+Предполагается, что вывод команды `conda env list --json` имеет структуру `JSON`, включающую ключ `"envs"`, к которому можно обращаться для получения списка окружений.  
+Пример вывода:
+```pwershell
+{
+  "envs": [
+    "C:\\Users\\user\\anaconda3",
+    "C:\\Users\\user\\anaconda3\\envs\\fastapi",
+    "C:\\Users\\user\\anaconda3\\envs\\spark",  
+    "C:\\Users\\user\\anaconda3\\envs\\tf",     
+    "C:\\Users\\user\\anaconda3\\envs\\vbt"     
+  ]
+}
+```
+
+Поэтому можно обрабатывать списки окружений:
+```python
+# Выполняем команду "conda env list --json" и декодируем вывод
+envs_info = subprocess.check_output(\
+    ["conda", "env", "list", "--json"]).decode("utf-8")
+# Преобразуем JSON-данные в словарь
+envs_data = json.loads(envs_info)
+
+for env in envs_data["envs"]:
+    # Извлекаем имя окружения из пути
+    env_name = os.path.basename(env)
+```
+
+## CONDA_ENVS_PATH - папка с ВО по умолчанию для Conda
+Для Conda существует специальная переменная окружения, которая указывает на базовую директорию, где хранятся все виртуальные окружения. Эта переменная называется CONDA_ENVS_PATH:
+
+```python
+import os
+
+conda_envs_path = os.environ.get("CONDA_ENVS_PATH")
+
+if conda_envs_path:
+    print(f"Conda environments are located in: {conda_envs_path}")
+else:
+    print("CONDA_ENVS_PATH is not set.")
+```
