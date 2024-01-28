@@ -66,35 +66,105 @@ which docker
 
 Контейнеры также могут включать специфические файлы или директории, которые указывают на их принадлежность к контейнеру. Например, `/run/secrets/kubernetes.io/serviceaccount/token` может свидетельствовать о работе в Kubernetes.
 
-Пример скрипта на Python, который может выполнять несколько проверок для определения того, выполняется ли программа в контейнере:
+Пример скрипта на Python, который может выполнять несколько проверок для определения того, выполняется ли программа в контейнере. А также выводить в консоль / сохранять в файл нужный список переменных:
 ```python
 import os
+import platform
+
+
+def print_environment_variables(selected_vars=None, save_to_file=False):
+    if selected_vars is not None:
+        full_list = True if "FULL_ENVIRON_LIST" in selected_vars else False
+    else:
+        full_list = False
+    # Получаем словарь с переменными окружения
+    env_vars = os.environ
+
+    # Выводим информацию о платформе
+    print(f"Информация о платформе: {platform.system()} {platform.release()}")
+
+    container_id = check_in_container()
+
+    # Выбираем переменные для вывода (по умолчанию - _HOME_SPARK_MASTER)
+    if selected_vars is None:
+        selected_vars = ["_", "HOME", "SPARK_MASTER"]
+    elif full_list: selected_vars = env_vars
+
+    # Выводим информацию о каждой переменной окружения из списка
+    print("\nИнформация о переменных окружения:")
+    for key in selected_vars:
+        if key in env_vars:
+            print(f"{key}: {env_vars[key]}")
+        else:
+            print(f"{key}: Не найдено")
+
+    # Сохраняем в файл, если указано
+    if save_to_file:
+        save_env_to_file(env_vars, selected_vars, container_id)
+
 
 def check_in_container():
     # Проверка наличия /proc/1/cgroup
     cgroup_path = '/proc/1/cgroup'
     if os.path.exists(cgroup_path):
         with open(cgroup_path, 'r') as cgroup_file:
-            if any("docker" in line for line in cgroup_file):
-                return True
+            for line in cgroup_file:
+                if "docker" in line:
+                    # Ищем строку, содержащую "docker" и извлекаем идентификатор контейнера
+                    parts = line.split(":")
+                    if len(parts) >= 3:
+                        container_id_full = parts[2].strip()
+                        container_id = container_id_full.split("/")[-1]
+                        print(f"Программа выполняется в контейнере: {container_id}")
+                        return container_id
 
     # Проверка наличия /var/run/docker.sock
     docker_sock_path = '/var/run/docker.sock'
     if os.path.exists(docker_sock_path):
         return True
 
-    # Проверка наличия утилиты Docker
-    docker_command = 'docker'
-    if shutil.which(docker_command):
-        return True
-
-    # Другие возможные проверки, в зависимости от контекста
-
+    print("Программа не выполняется в контейнере.")
     return False
 
+
+def save_env_to_file(env_vars, selected_vars, container_id):
+    # Формируем строку для сохранения
+    lines_to_save = [
+        f"{key}={value}" for key,
+        value in env_vars.items()
+        if key in selected_vars
+    ]
+    print("строку для сохранения")
+    print(lines_to_save)
+    # Добавляем информацию о контейнере, если есть
+    if container_id:
+        lines_to_save.append(f"CONTAINER_ID={container_id}")
+
+    # Путь для сохранения файла
+    home_path = os.path.expanduser("/")
+    save_folder_path = os.path.join(home_path, "work", "environ")
+
+    # Создаем папку, если не существует
+    os.makedirs(save_folder_path, exist_ok=True)
+
+    # Формируем путь для сохранения файла
+    save_path = os.path.join(save_folder_path, ".env_list_full")
+
+    # Сохраняем в файл
+    with open(save_path, 'w') as save_file:
+        save_file.write("\n".join(lines_to_save))
+
+    print(f"Переменные окружения сохранены в файл: {save_path}")
+
+
 if __name__ == "__main__":
-    if check_in_container():
-        print("Программа выполняется в контейнере.")
-    else:
-        print("Программа не выполняется в контейнере.")
+    # Примеры использования:
+
+    # 1. Вывести переменные по умолчанию
+    # print_environment_variables()
+
+    # 2. Вывести только выбранные переменные и сохранить в файл
+    selected_vars = ["TERM_PROGRAM", "HOME", "SPARK_MASTER"]
+    # selected_vars = ["FULL_ENVIRON_LIST"]
+    print_environment_variables(selected_vars, save_to_file=True)
 ```

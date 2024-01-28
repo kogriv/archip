@@ -8,6 +8,7 @@
 ## Таблица команд для **conda** и **venv**
 | Описание команды | Пример для Conda | Пример для Venv |
 |------------------|------------------|-----------------|
+| Список всех ВО | `conda env list` `conda info --envs` | `python -m venv --list` `python -m venv -l` |
 | Создание нового окружения | `conda create --name myenv` | `python -m venv myenv` |
 | Активация окружения | `conda activate myenv` | `source myenv/bin/activate` (Unix)<br>`myenv\Scripts\activate` (Windows) |
 | Деактивация окружения | `conda deactivate` | `deactivate` |
