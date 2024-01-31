@@ -56,8 +56,8 @@ Scope list of variable 'f': ['__annotations__', '__builtins__',
 **Closure (`__closure__`):**  
 Вы видите, что __closure__ содержит кортеж с одним элементом. Этот элемент - объект типа `<cell at 0x...: str object at 0x...>`. Здесь `str object` - это тип объекта (строка), и адрес `0x...` представляет место в памяти, где хранится значение переменной name (в данном случае, `"Ivan"`).
 
-**Local variables (`__code__.co_varnames`):** 
-В этом случае локальных переменных внутри функции `say_goodbye` нет, поэтому `co_varnames` пуст. Поместив в тело вложенной функции переменную, напрмер `nested_var = 'some_value_for_nested_var'`, в выводе мы увидим: `Local variables f.__code__.co_varnames: ('nested_var',)`
+**Local variables (`__code__.co_varnames`):**  
+Кортеж имен переменных. В этом случае локальных переменных внутри функции `say_goodbye` нет, поэтому `co_varnames` пуст. Поместив в тело вложенной функции переменную, напрмер `nested_var = 'some_value_for_nested_var'`, в выводе мы увидим: `Local variables f.__code__.co_varnames: ('nested_var',)`
 
 **Globals (`__globals__`):**  
 Глобальные переменные в данном случае содержат информацию о модуле, в котором определена функция. `__name__`, `__file__`, и другие глобальные переменные относятся к модулю, в котором выполняется скрипт.
