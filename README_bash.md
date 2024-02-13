@@ -243,3 +243,64 @@ else
 fi
 ```
 
+## find *activate
+Ищем скрипты активации виртуальных окружений питон.
+```bash
+find "/" -name "*activate" -type f
+```
+Запуск в контейнере. Результат:
+```bash
+find: ‘/proc/7/task/7/fdinfo’: Permission denied
+find: ‘/proc/7/map_files’: Permission denied
+find: ‘/proc/7/fdinfo’: Permission denied
+find: ‘/proc/18/task/18/fdinfo’: Permission denied
+find: ‘/proc/18/map_files’: Permission denied
+find: ‘/proc/18/fdinfo’: Permission denied
+find: ‘/proc/6340’: No such file or directory
+find: ‘/proc/6341’: No such file or directory
+find: ‘/proc/6344’: No such file or directory
+/usr/lib/python3.10/venv/scripts/common/activate
+/opt/conda/lib/python3.11/venv/scripts/common/activate
+/opt/conda/lib/python3.11/site-packages/conda/shell/bin/activate
+/opt/conda/lib/python3.11/site-packages/conda/shell/bin/deactivate
+/opt/conda/bin/activate
+/opt/conda/bin/deactivate
+```
+`Permission denied` и `No such file or directory` - ошибки, которые тем не менее "проглатываются" башем и оболочка продолжает поиск.
+
+Чтобы игнорировать сообщения об ошибках, вы можете направить вывод сообщений об ошибках в `/dev/null`, что является специальным файлом устройства в UNIX-подобных системах, который игнорирует любой ввод.
+```bash
+find "/" -name "*activate" -type f 2>/dev/null
+```
+Результат:
+```bash
+/usr/lib/python3.10/venv/scripts/common/activate
+/opt/conda/lib/python3.11/venv/scripts/common/activate
+/opt/conda/lib/python3.11/site-packages/conda/shell/bin/activate
+/opt/conda/lib/python3.11/site-packages/conda/shell/bin/deactivate
+/opt/conda/bin/activate
+/opt/conda/bin/deactivate
+```
+
+Для того чтобы подавить только сообщения об ошибках "No such file or directory" (No such file or directory), а остальные ошибки сохранялись бы в выводе, вам потребуется немного более сложная конструкция. В этом случае вы можете воспользоваться командой grep для фильтрации сообщений об ошибках:
+```bash
+find "/" -name "*activate" -type f 2>&1 | grep -v "No such file or directory"
+```
+
+Здесь `2>&1` перенаправляет как стандартный вывод ошибок `stderr (2)`, так и стандартный вывод `stdout (1)` в конвейер. `grep -v "No such file or directory"` фильтрует строки, отбрасывая те, которые содержат "No such file or directory".
+
+Такая обработка ошибок работает непосредственно в оболочке баш. Если использовать команду поиска в питон:
+```python
+bash_path = "/"
+find_command = \
+f'find {bash_path} -name "*activate" -type f  2>/dev/null'
+output = subprocess.check_output(
+find_command, shell=True, text=True,
+stderr=subprocess.STDOUT)
+```
+питон получит ошибку и прервет выполнение `subprocess.check_output(...)`. Поэтому надежным способом будет исключение папки из поиска, на которой возникают ошибки. Хотя это не гарантирует возникновение ошибок на других папках. Надежного способа обрабатывать такие ошибки внутри `subprocess.check_output(...)` я не нашел.  
+Исключаем папки:
+
+```python
+f'find {bash_path} -path "/proc" -prune -o -name "*activate" -type f -print'
+```
