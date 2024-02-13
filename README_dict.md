@@ -428,7 +428,7 @@ if __name__ == '__main__':
     envilog.mylev(30,"d2:")
     envilog.mylev(30,d2)
 ```
-файл с классом - по ссылке [dictan.py](https://github.com/kogriv/chicago_spark/blob/master/ChiSpark/dictan.py) в моем гит-репозитории `chicago_spark/ChiSpark/mylog.py`
+файл с классом - по ссылке [dictan.py](https://github.com/kogriv/chicago_spark/blob/master/ChiSpark/dictan.py) в моем гит-репозитории `chicago_spark/ChiSpark/dictan.py`
 
 видим:
 ```cmd
