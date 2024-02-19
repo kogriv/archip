@@ -9,7 +9,7 @@
 | Описание команды | Пример для Conda | Пример для Venv |
 |------------------|------------------|-----------------|
 | Список всех ВО | `conda env list` `conda info --envs` | `python -m venv --list` `python -m venv -l` |
-| Создание нового окружения | `conda create --name myenv` | `python -m venv myenv` |
+| Создание нового окружения | `conda create --name myenv` | `python -m venv myenv`<br>`python3 -m venv /path/to/myenv_name` |
 | Активация окружения | `conda activate myenv` | `source myenv/bin/activate` (Unix)<br>`myenv\Scripts\activate` (Windows) |
 | Деактивация окружения | `conda deactivate` | `deactivate` |
 | Установка пакета в окружение | `conda install -n myenv numpy` | `(myenv) pip install numpy` |
@@ -528,3 +528,19 @@ find / -name .condarc
 `Where-Object {$_}`: Это фильтр, который убирает пустые строки из вывода.
 
 `Invoke-Expression`: Эта команда выполняет строку как команду PowerShell.
+
+## Активация конда окружения по пути
+Если вы хотите выполнить команду `conda list` для определенного окружения Conda без его активации, вы можете использовать флаг `-p` или `--prefix` для указания пути к окружению.
+
+В вашем случае, если вы хотите выполнить команду `conda list` для окружения, расположенного по пути `/opt/conda` - базовое окружение, вы можете использовать следующий синтаксис:
+```bash
+conda list -p /opt/conda
+```
+
+для виндоус пути `C:\Users\user\anaconda3\envs\fastapi`:
+```powershell
+conda list -p C:\Users\user\anaconda3\envs\fastapi
+```
+
+Conda может управлять пакетами из различных каналов, в том числе из официального репозитория Anaconda, conda-forge, PyPI (Python Package Index) и других. Когда вы устанавливаете пакеты с помощью Conda, по умолчанию используется канал по умолчанию, который обычно является репозиторием Anaconda. Однако вы также можете указать другие каналы при установке пакетов.
+
