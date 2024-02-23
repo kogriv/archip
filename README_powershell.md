@@ -205,6 +205,106 @@ echo $PROFILE
 ```
 в PowerShell, чтобы узнать актуальное расположение вашего файла профиля.
 
+## Работающие псевдонимы для разных сценариев
+Ниже приведен скрипт для файла профиля.  
+Проверьте файл профиля `$PROFILE`.
+```powershell
+PS C:\Users\user> $PROFILE
+C:\Users\user\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+```
+вернулось значение переменной окружения, в котором был сохранен путь к файлу, который как предполагается должен существовать и иметь какие то инструкции.
+
+Проверьте, есть ли у вас профиль: В открытом окне PowerShell выполните команду:
+```powershell
+Test-Path $Profile
+```
+Если эта команда возвращает False, значит, у вас еще нет профиля, и вы можете создать его.  
+2. Создайте профиль, если его нет: Для создания профиля запустите следующую команду:
+```powershell
+New-Item -Type File -Force $Profile
+```
+Это создаст файл профиля PowerShell, если его еще нет.
+
+Пример скрипта файла профиля с созданием псевдонимов
+```powershell
+function Start-CodeInPro {
+    Set-Location C:\Users\user\Documents\Pro
+    code .
+}
+function Start-ChiClusterStart {
+    Set-Location C:\Users\user\Documents\Pro\chicago_spark\scripts
+    .\start_cont.bat
+}
+function Start-ChiClusterStop {
+    Set-Location C:\Users\user\Documents\Pro\chicago_spark\scripts
+    .\stop_cont.bat
+}
+function Goto-DocPro {
+    Set-Location C:\Users\user\Documents\Pro
+}
+
+#New-Alias -Name pro -Value (Goto-Path "C:\Users\user\Documents\Pro")
+
+#New-Alias -Name pro -Value { Goto-Path -Path "C:\Users\user\Documents\Pro" }
+Write-Host "========================================================="
+Write-Host "== ALIASES =============================================="
+Write-Host ""
+
+New-Alias dockerd "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+Write-Host "=== dockerd ==== C:\Program Files\Docker\Docker\Docker Desktop.exe"
+
+Write-Host ""
+New-Alias pr Goto-DocPro
+Write-Host "=== pr ========= Set-Location C:\Users\user\Documents\Pro"
+
+Write-Host ""
+New-Alias procode Start-CodeInPro
+Write-Host "=== procode ==== C:\Users\user\Documents\Pro -> code ."
+
+Write-Host ""
+New-Alias chistart Start-ChiclusterStart
+Write-Host "=== chistart === C:\Users\user\Documents\Pro\chicago_spark\scripts  -> .\start_cont.bat"
+
+Write-Host ""
+New-Alias chistop Start-ChiclusterStop
+Write-Host "=== chistop ==== C:\Users\user\Documents\Pro\chicago_spark\scripts  -> .\stop_cont.bat"
+
+Write-Host ""
+Write-Host "Aliases created"
+Write-Host "========================================================="
+```
+и такой красивый вывод:
+```powershell
+Windows PowerShell
+(C) Корпорация Майкрософт (Microsoft Corporation). Все права защищены.
+
+Попробуйте новую кроссплатформенную оболочку PowerShell (https://aka.ms/pscore6)
+
+Хотите активировать Conda? (y/n): n
+      ,--./,-.
+     / #      \
+    |   P*     |
+     \   I    /
+      ._,.P.+'
+=========================================================
+== ALIASES ==============================================
+
+=== dockerd ==== C:\Program Files\Docker\Docker\Docker Desktop.exe
+
+=== pr ========= Set-Location C:\Users\user\Documents\Pro
+
+=== procode ==== C:\Users\user\Documents\Pro -> code .
+
+=== chistart === C:\Users\user\Documents\Pro\chicago_spark\scripts  -> .\start_cont.bat
+
+=== chistop ==== C:\Users\user\Documents\Pro\chicago_spark\scripts  -> .\stop_cont.bat
+
+Aliases created
+=========================================================
+Загрузка личных и системных профилей заняла 2518мс.
+PS C:\Users\user>
+```
+
 ## Стартовый скрипт (найти и отредактировать)
 В PowerShell стартовый скрипт автоматически запускается при открытии сессии. Стартовый скрипт, также известный как профиль, это скрипт, который выполняется при старте PowerShell и может содержать функции, алиасы и другие команды, которые настраивают среду пользователя.
 
@@ -452,6 +552,26 @@ ForEach-Object имеет ряд параметров, которые позво
 Для перехода на несколько уровней вверх в иерархии каталогов в PowerShell вы можете использовать выражение ..\, которое позволяет перемещаться на один уровень выше. Повторяя его нужное количество раз, вы достигнете желаемого уровня.
 
 Например, если вы хотите перейти на три уровня вверх от текущего местоположения, выполните следующую команду `cd ..\..\..`. Это переместит вас на три уровня выше относительно вашего текущего каталога. Количество `..\` указывает на количество уровней, на которые вы хотите подняться вверх.
+
+## Профиль $PROFILE - проверка, создание
+Для различных установок и настроек работы в оболочке поуэршелл необходимо использовать файл профиля `$PROFILE`.
+```powershell
+PS C:\Users\user> $PROFILE
+C:\Users\user\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+```
+вернулось значение переменной окружения, в котором был сохранен путь к файлу, который как предполагается должен существовать и иметь какие то инструкции.
+
+Проверьте, есть ли у вас профиль: В открытом окне PowerShell выполните команду:
+```powershell
+Test-Path $Profile
+```
+Если эта команда возвращает False, значит, у вас еще нет профиля, и вы можете создать его.  
+2. Создайте профиль, если его нет: Для создания профиля запустите следующую команду:
+```powershell
+New-Item -Type File -Force $Profile
+```
+Это создаст файл профиля PowerShell, если его еще нет. 
+
 
 ## История команд
 В PowerShell можно вывести историю команд, используя переменную $history. 
