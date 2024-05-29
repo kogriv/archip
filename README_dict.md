@@ -154,7 +154,7 @@ def is_in_list(obj, obj_list):
 
 Ниже приведен класс для более подробного разбора состава словарей с выводом информации которую дают функции `id(), hash(), type(), repr()` для ключа и для значения. Далее приведен пример с использованием объектов кастомного класса в качестве ключей (при этом объекты также могут быть использованы и для значений, но этот кейс здесь не рассматривается).
 
-Для вывода сообщений используется кастомный класс `MyLogger` на основе библиотеки `logging` (код класса находится в файле [mylog.py](https://github.com/kogriv/chicago_spark/blob/master/ChiSpark/enviserv/mylog.py) в другом моем репозитории `chicago_spark/ChiSpark/mylog.py`)
+Для вывода сообщений используется кастомный класс `MyLogger` на основе библиотеки `logging` (код класса находится в файле [mylog.py](https://github.com/kogriv/chicago_spark/blob/master/ChiSpark/enviserv/mylog.py) в другом моем репозитории `chicago_spark/ChiSpark/enviserv/mylog.py`)
 
 ```python
 class DictAnalyzer:
