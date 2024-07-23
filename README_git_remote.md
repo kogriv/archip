@@ -1,4 +1,4 @@
-
+## Авторизация
 В powershell:
 
 ```powershell
@@ -74,7 +74,7 @@ Authenticate Git with your GitHub credentials? (Y/n)
 
 Это означает, что после перезагрузки PowerShell или закрытия и повторного открытия окна терминала вам не нужно будет снова вводить учетные данные или токен. GitHub CLI будет использовать сохраненные учетные данные или токен для выполнения авторизованных операций.
 
-----------------------------------
+## Создание нового репозитория на гитхаб удаленно
 Чтобы удаленно создать репозиторий на GitHub и загрузить в него существующий локальный репозиторий (клонировать его на GitHub), вы можете использовать команды Git и GitHub CLI (Command Line Interface). Вот как это сделать:
 
 Убедитесь, что у вас установлен Git и GitHub CLI на вашем компьютере.
@@ -147,6 +147,109 @@ git remote rename master origin
 Иными словами, изменение имени "origin" на вашем компьютере не затрагивает удаленный репозиторий на GitHub и не вносит изменений в его структуру или настройки. Это просто изменение имени для удобства управления удаленными репозиториями на вашем локальном компьютере.
 
 ---------------------------------------------
+
+## Журналирование коммитов в ридми корня
+скрипт, который будет автоматически обновлять ваш README.md файл с таблицей, содержащей список всех репозиториев и общее количество коммитов в каждом из них. Для этого можно использовать GitHub Actions.
+
+1. Создайте GitHub Action, который будет запускаться при каждом коммите:  
+Создайте файл .github/workflows/update_readme.yml в корне вашего репозитория с содержимым:  
+```yaml
+name: Update README
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install PyGithub
+
+      - name: Update README.md
+        run: |
+          python update_readme.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md
+          git commit -m 'Update README with commit counts'
+          git push
+```
+
+2. Создайте Python-скрипт для обновления README.md:  
+Создайте файл update_readme.py в корне вашего репозитория с содержимым:  
+```python
+import os
+from github import Github
+
+# Получение токена GitHub из переменных окружения
+token = os.getenv('GITHUB_TOKEN')
+g = Github(token)
+
+# Ваш GitHub username
+username = "kogriv"
+
+# Получение всех репозиториев пользователя
+user = g.get_user(username)
+repos = user.get_repos()
+
+# Создание таблицы с количеством коммитов
+table = "| Repository | Commits |\n|------------|---------|\n"
+for repo in repos:
+    commits = repo.get_commits().totalCount
+    table += f"| [{repo.name}]({repo.html_url}) | {commits} |\n"
+
+# Обновление README.md
+with open("README.md", "r") as file:
+    readme = file.readlines()
+
+# Найдите секцию, которую нужно обновить, и обновите ее
+start_marker = "<!-- START_COMMIT_LIST -->\n"
+end_marker = "<!-- END_COMMIT_LIST -->\n"
+start_index = readme.index(start_marker) + 1
+end_index = readme.index(end_marker)
+
+new_readme = readme[:start_index] + [table] + readme[end_index:]
+
+with open("README.md", "w") as file:
+    file.writelines(new_readme)
+```
+
+3. Обновите ваш README.md файл, чтобы включить маркеры:  
+```markdown
+# Your README
+
+...
+
+<!-- START_COMMIT_LIST -->
+<!-- END_COMMIT_LIST -->
+```
+
+4. Настройте секреты GitHub для токена:  
+Перейдите в настройки вашего репозитория на GitHub:  
+
+- В меню слева выберите "Secrets and variables" -> "Actions".  
+- Нажмите "New repository secret".  
+- Назовите секрет GITHUB_TOKEN и вставьте ваш GitHub Personal Access Token.  
+
+Теперь, каждый раз, когда вы делаете коммит в main ветку, GitHub Action будет запускаться, обновлять README.md и добавлять туда таблицу с количеством коммитов в каждом из ваших репозиториев.
+
+Убедитесь, что ваш Personal Access Token имеет доступ к вашим репозиториям и разрешения на запись.
 
 
 
