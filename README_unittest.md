@@ -32,9 +32,123 @@ python -m unittest discover -s tests -p "test_*.py"
 - `-s tests` указывает папку, где находятся тесты.
 - `-p "test_*.py"` задает шаблон для имен файлов тестов (в данном случае, любые файлы, начинающиеся с `test_`).
 
-# Пример теста для коннектора к бд
+# Пример мок-теста для коннектора к бд
+## fetcher
+```python
+# fetcher.py
+import os
+import sqlite3
 
-Используем код
+class DataBaseFetcher:
+    """
+    Class to connect to a SQLite database, check database availability, and verify table existence.
+
+    Attributes:
+    ----------
+    db_path : str
+        Path to the SQLite database, derived from the DB_PATH environment variable or the db_name parameter.
+    db_table : str
+        Name of the database table, derived from the DB_TABLE environment variable or the db_table parameter.
+    conn : sqlite3.Connection
+        Database connection, established when connect() is called.
+    """
+
+    def __init__(self, db_name=None, db_table=None):
+        """
+        Initializes DataFetcher with database path and table name.
+
+        Parameters:
+        ----------
+        db_name : str, optional
+            Database file name. If not specified, defaults to the DB_PATH environment variable or '/database/brtn.sqlite'.
+        db_table : str, optional
+            Name of the database table. If not specified, defaults to the DB_TABLE environment variable or 'default_table'.
+        """
+        db_folder_path = os.getenv("DB_PATH")
+        db_file_name = db_name or os.getenv("DB_NAME")
+
+        if db_folder_path and db_file_name:
+            self.db_path = os.path.join(db_folder_path, db_file_name)
+        else:
+            self.db_path = None
+        self.db_table = db_table or os.getenv("DB_TABLE")
+        self.conn = None
+
+    def connect(self):
+        """
+        Establishes a connection to the database.
+        """
+        if not self.db_path:
+            raise ValueError("Database path is not set. Please provide a valid database path.")
+
+        try:
+            self.conn = sqlite3.connect(self.db_path)
+            print(f"Connection established to database at: {self.db_path}")
+        except sqlite3.Error as e:
+            print(f"Error connecting to database: {e}")
+
+    def close_connection(self):
+        """
+        Closes the database connection.
+        """
+        if self.conn:
+            self.conn.close()
+            print("Connection closed.")
+
+    def check_connection_closed(self):
+        """
+        Checks if the database connection is closed by attempting to open a cursor.
+        If the connection is closed, a ProgrammingError is raised.
+        """
+        try:
+            self.conn.cursor()  # Attempt to open a cursor on a closed connection
+            print("Connection is still open.")
+        except sqlite3.ProgrammingError:
+            print("Connection is closed successfully.")
+
+    def check_db_connection(self):
+        """
+        Checks the database accessibility by attempting to connect to it.
+        
+        Returns:
+        ----------
+        bool
+            True if the database is accessible, False otherwise.
+        """
+        try:
+            self.connect()
+            self.close_connection()
+            print("Database is accessible.")
+            return True
+        except sqlite3.Error:
+            print("Database is not accessible.")
+            return False
+
+    def check_table_availability(self):
+        """
+        Checks if the specified table exists and is accessible in the database.
+
+        Returns:
+        ----------
+        bool
+            True if the table is accessible, False otherwise.
+        """
+        if not self.db_table:
+            raise ValueError("Table name is not set. Please provide a valid table name.")
+        self.connect()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute(f"SELECT 1 FROM {self.db_table} LIMIT 1;")
+            print(f"Table '{self.db_table}' is available.")
+            return True
+        except sqlite3.Error:
+            print(f"Table '{self.db_table}' is not available.")
+            return False
+        finally:
+            self.close_connection()
+```
+
+## test
 ```python
 import os
 import unittest
@@ -43,41 +157,47 @@ from datahub.fetcher import DataBaseFetcher
 
 class TestDataBaseFetcher(unittest.TestCase):
     
-    @patch('datahub.fetcher.sqlite3.connect')  # Изменено здесь
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.db'})
     def test_connect_success(self, mock_connect):
         db_fetcher = DataBaseFetcher(db_name='test.db', db_table='test_table')
         db_fetcher.connect()
         mock_connect.assert_called_once_with(db_fetcher.db_path)
         self.assertIsNotNone(db_fetcher.conn)
 
-    @patch('datahub.fetcher.sqlite3.connect')  # Изменено здесь
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.db'})
     def test_connect_failure(self, mock_connect):
         mock_connect.side_effect = Exception("Connection error")
         db_fetcher = DataBaseFetcher(db_name='test.db', db_table='test_table')
         db_fetcher.connect()
         self.assertIsNone(db_fetcher.conn)
 
-    @patch('datahub.fetcher.sqlite3.connect')  # Изменено здесь
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.db'})
     def test_close_connection(self, mock_connect):
         db_fetcher = DataBaseFetcher(db_name='test.db', db_table='test_table')
         db_fetcher.connect()
         db_fetcher.close_connection()
         mock_connect.return_value.close.assert_called_once()
 
-    @patch('datahub.fetcher.sqlite3.connect')  # Изменено здесь
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.db'})
     def test_check_db_connection_success(self, mock_connect):
         mock_connect.return_value = MagicMock()
         db_fetcher = DataBaseFetcher(db_name='test.db', db_table='test_table')
         self.assertTrue(db_fetcher.check_db_connection())
         mock_connect.assert_called_once()
 
-    @patch('datahub.fetcher.sqlite3.connect')  # Изменено здесь
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.db'})
     def test_check_db_connection_failure(self, mock_connect):
         mock_connect.side_effect = sqlite3.Error("Database not accessible")
         db_fetcher = DataBaseFetcher(db_name='test.db', db_table='test_table')
         self.assertFalse(db_fetcher.check_db_connection())
 
-    @patch('datahub.fetcher.sqlite3.connect')  # Изменено здесь
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.db'})
     def test_check_table_availability_success(self, mock_connect):
         mock_cursor = MagicMock()
         mock_cursor.execute.return_value = None
@@ -88,7 +208,8 @@ class TestDataBaseFetcher(unittest.TestCase):
         self.assertTrue(db_fetcher.check_table_availability())
         mock_cursor.execute.assert_called_once_with("SELECT 1 FROM test_table LIMIT 1;")
 
-    @patch('datahub.fetcher.sqlite3.connect')  # Изменено здесь
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.db'})
     def test_check_table_availability_failure(self, mock_connect):
         mock_cursor = MagicMock()
         mock_cursor.execute.side_effect = sqlite3.Error("Table not found")
@@ -98,7 +219,8 @@ class TestDataBaseFetcher(unittest.TestCase):
         db_fetcher.connect()
         self.assertFalse(db_fetcher.check_table_availability())
 
-    @patch('datahub.fetcher.sqlite3.connect')  # Изменено здесь
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.db'})
     def test_check_connection_closed(self, mock_connect):
         mock_connect.return_value.cursor.side_effect = sqlite3.ProgrammingError("Connection is closed")
         db_fetcher = DataBaseFetcher(db_name='test.db', db_table='test_table')
@@ -248,3 +370,43 @@ def test_without_sleep(self, mock_sleep):
 
 `@patch` делает тесты более предсказуемыми, быстрыми и независимыми от состояния внешних ресурсов, повышая их надёжность и гибкость.
 
+# Подмена значений переменных окружения `os.environ`
+
+Декоратор `@patch.dict(os.environ, {...})` из модуля `unittest.mock` используется для временной подмены значений переменных окружения `os.environ` на время выполнения теста. Вот как это работает более подробно:
+
+Создание временного окружения: Когда используется `@patch.dict(os.environ, {...})`, Python берет текущие значения переменных окружения (из `os.environ`) и временно заменяет их на значения, указанные в словаре внутри `patch.dict`. Эти изменения применяются только в пределах области действия декорированной функции.
+
+Использование подмененных значений: В нашем случае мы заменяем переменные окружения `DB_PATH` и `DB_NAME` значениями `'/test/path'` и `'test.db'`. Это значит, что внутри функции `test_connect_success`, вызовы к `os.getenv('DB_PATH')` и `os.getenv('DB_NAME')` вернут эти тестовые значения. Такой подход особенно удобен, если код, который мы тестируем, зависит от переменных окружения.
+
+Автоматическое восстановление значений: Когда выполнение функции завершается (или тест заканчивается), `@patch.dict` автоматически возвращает переменные окружения к их исходным значениям. Это гарантирует, что изменения не повлияют на другие тесты или части кода.
+
+# Тест неудачной попытки соединения с базой данных
+Тест `test_connect_failure` направлен на проверку того, как метод `connect` обрабатывает исключение при неудачной попытке соединения с базой данных. Цель этого теста — удостовериться, что:
+
+- Исключение, вызванное `mock_connect.side_effect`, перехватывается методом `connect`, и метод корректно обрабатывает ситуацию.
+- После обработки исключения атрибут `self.conn` остается `None`, что подтверждает отсутствие установленного соединения.
+
+Вместо реального подключения, `mock_connect.side_effect = Exception("Connection error")` подменяет `sqlite3.connect` и вызывает исключение. Метод `connect` должен "поймать" это исключение и установить `self.conn = None`, вместо того чтобы прерывать выполнение.  
+
+Таким образом, тест `test_connect_failure проверяет`:
+- Обработку исключений: Убедиться, что метод `connect` не завершает выполнение с ошибкой и не выбрасывает необработанное исключение.
+- Корректность состояния: После исключения `self.conn` должно оставаться `None`, что указывает на отсутствие активного соединения.
+
+Добавление обработки исключений в метод `connect` позволяет тесту успешно проверить, что код правильно обрабатывает ситуацию, когда соединение установить не удалось.
+
+# Порядок вывода и обработки
+
+`unittest` сначала выводит сообщение о тестах, а затем собирает и показывает результаты.  
+
+В выводе `unittest`, каждая точка (`.`) представляет успешное выполнение одного теста. Первая точка (`.`) перед `"Connection established to database at: /test/path/test.db"` обозначает успешное завершение `test_connect_failure`, а затем второй тест (`test_connect_success`) выводит `"Connection established..."` и завершается точкой.  
+
+## Как работает порядок выполнения тестов в unittest
+
+`unittest` определяет порядок тестов, сортируя их названия в алфавитном порядке. Это значит, что тесты с названиями, начинающимися с символов, расположенных ближе к началу алфавита (например, `a`, `b`, и так далее), будут выполнены раньше.  
+
+**Изменение порядка выполнения**
+Если порядок выполнения тестов критичен, можно применить один из подходов:
+
+- Переименовать тесты — изменить названия так, чтобы они шли в желаемом порядке, например, назвать первый тест `test_01_connect_failure`, а второй — `test_02_connect_success`.
+- Использовать `TestSuite` — явным образом указать порядок тестов, добавив их в `TestSuite` в нужной последовательности.
+- Плагин или ключ командной строки — например, с помощью библиотеки `pytest` можно задать порядок через параметры, такие как `--shuffle`, или использовать декораторы для упорядочивания выполнения тестов.
