@@ -118,3 +118,16 @@ Below are various settings you can change in your workspace settings.json file (
     "python.analysis.gotoDefinitionInStringLiteral": false
         Отключает возможность перехода к определению, если строка выглядит как имя модуля.
 
+# Ограничьте рабочую область
+
+Если у вас всё ещё большая рабочая область, настройте файлы для наблюдения. Проверьте, что вы исключили ненужные каталоги и файлы (например, node_modules, .git и другие).
+В settings.json можно добавить:
+```json{
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.git/**": true,
+    "**/__pycache__/**": true,
+    "**/build/**": true
+  }
+}
+```
