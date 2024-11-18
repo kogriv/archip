@@ -890,3 +890,641 @@ def test_without_sleep(self, mock_sleep):
 - Переименовать тесты — изменить названия так, чтобы они шли в желаемом порядке, например, назвать первый тест `test_01_connect_failure`, а второй — `test_02_connect_success`.
 - Использовать `TestSuite` — явным образом указать порядок тестов, добавив их в `TestSuite` в нужной последовательности.
 - Плагин или ключ командной строки — например, с помощью библиотеки `pytest` можно задать порядок через параметры, такие как `--shuffle`, или использовать декораторы для упорядочивания выполнения тестов.
+
+# Описание работы
+Взято с pythonworld.ru
+
+## Простой пример использования
+
+В Python встроен модуль `unittest`, который поддерживает автоматизацию тестов, использование общего кода для настройки и завершения тестов, объединение тестов в группы, а также позволяет отделять тесты от фреймворка для вывода информации.
+
+Для автоматизации тестов, unittest поддерживает некоторые важные концепции:
+
+- Испытательный стенд (`test fixture`) - выполняется подготовка, необходимая для выполнения тестов и все необходимые действия для очистки после выполнения тестов. Это может включать, например, создание временных баз данных или запуск серверного процесса.
+- Тестовый случай (`test case`) - минимальный блок тестирования. Он проверяет ответы для разных наборов данных. Модуль unittest предоставляет базовый класс `TestCase`, который можно использовать для создания новых тестовых случаев.
+- Набор тестов (`test suite`) - несколько тестовых случаев, наборов тестов или и того и другого. Он используется для объединения тестов, которые должны быть выполнены вместе.
+- Исполнитель тестов (`test runner`) - компонент, который управляет выполнением тестов и предоставляет пользователю результат. Исполнитель может использовать графический или текстовый интерфейс или возвращать специальное значение, которое сообщает о результатах выполнения тестов.
+
+Модуль unittest предоставляет богатый набор инструментов для написания и запуска тестов. Однако достаточно лишь некоторых из них, чтобы удовлетворить потребности большинства пользователей.
+
+Вот короткий скрипт для тестирования трех методов строк:
+```python
+import unittest
+
+class TestStringMethods(unittest.TestCase):
+
+  def test_upper(self):
+      self.assertEqual('foo'.upper(), 'FOO')
+
+  def test_isupper(self):
+      self.assertTrue('FOO'.isupper())
+      self.assertFalse('Foo'.isupper())
+
+  def test_split(self):
+      s = 'hello world'
+      self.assertEqual(s.split(), ['hello', 'world'])
+      # Проверим, что s.split не работает, если разделитель - не строка
+      with self.assertRaises(TypeError):
+          s.split(2)
+
+if __name__ == '__main__':
+    unittest.main()
+```
+Тестовый случай создаётся путём наследования от `unittest.TestCase`. 3 отдельных теста определяются с помощью методов, имя которых начинается на `test_`. Это соглашение говорит исполнителю тестов о том, какие методы являются тестами.
+
+Суть каждого теста - вызов `assertEqual()` для проверки ожидаемого результата; `assertTrue()` или `assertFalse()` для проверки условия; `assertRaises()` для проверки, что метод порождает исключение. Эти методы используются вместо обычного `assert` для того, чтобы исполнитель тестов смог взять все результаты и оформить отчёт.
+
+Методы `setUp()` и `tearDown()` (которые в данном простом случае не нужны) позволяют определять инструкции, выполняемые перед и после каждого теста, соответственно.
+
+Последние 2 строки показывают простой способ запуска тестов. `unittest.main()` предоставляет интерфейс командной строки для тестирования программы. Будучи запущенным из командной строки, этот скрипт выводит отчёт, подобный этому:
+```bash
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+```
+## Интерфейс командной строки
+unittest может быть использован из командной строки для запуска модулей с тестами, классов или даже отдельных методов:
+
+```bash
+python -m unittest test_module1 test_module2
+python -m unittest test_module.TestClass
+python -m unittest test_module.TestClass.test_method
+```
+Можно также указывать путь к файлу:
+```bash
+python -m unittest tests/test_something.py
+```
+С помощью флага -v можно получить более детальный отчёт:
+```bash
+python -m unittest -v test_module
+```
+Для нашего примера подробный отчёт будет таким:
+```bash
+test_isupper (__main__.TestStringMethods) ... ok
+test_split (__main__.TestStringMethods) ... ok
+test_upper (__main__.TestStringMethods) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+```
+**-b (--buffer)** - вывод программы при провале теста будет показан, а не скрыт, как обычно.
+
+**-c (--catch)** - `Ctrl+C` во время выполнения теста ожидает завершения текущего теста и затем сообщает результаты на данный момент. Второе нажатие `Ctrl+C` вызывает обычное исключение `KeyboardInterrupt`.
+
+**-f (--failfast)** - выход после первого же неудачного теста.
+
+**--locals** (начиная с Python 3.5) - показывать локальные переменные для провалившихся тестов.
+
+## Обнаружение тестов
+unittest поддерживает простое обнаружение тестов. Для совместимости с обнаружением тестов, все файлы тестов должны быть модулями или пакетами, импортируемыми из директории верхнего уровня проекта
+
+Обнаружение тестов реализовано в `TestLoader.discover()`, но может быть использовано из командной строки:
+```bash
+cd project_directory
+python -m unittest discover
+```
+**-v (--verbose)** - подробный вывод.
+
+**-s (--start-directory) directory_name** - директория начала обнаружения тестов (текущая по умолчанию).
+
+***-p (--pattern) pattern*** - шаблон названия файлов с тестами (по умолчанию test*.py).
+
+**-t (--top-level-directory) directory_name** - директория верхнего уровня проекта (по умолчанию равна start-directory).
+
+## Организация тестового кода
+Базовые блоки тестирования это тестовые случаи - простые случаи, которые должны быть проверены на корректность.
+
+Тестовый случай создаётся путём наследования от `unittest.TestCase`.
+
+Тестирующий код должен быть самостоятельным, то есть никак не зависеть от других тестов.
+
+Простейший подкласс `TestCase` может просто реализовывать тестовый метод (метод, начинающийся с `test`). Вымышленный пример:
+```python
+import unittest
+
+class DefaultWidgetSizeTestCase(unittest.TestCase):
+    def test_default_widget_size(self):
+        widget = Widget('The widget')
+        self.assertEqual(widget.size(), (50, 50))
+```
+Заметьте, что для того, чтобы проверить что-то, мы используем один из `assert\*()` методов.
+
+Тестов может быть много, и часть кода настройки может повторяться. К счастью, мы можем определить код настройки путём реализации метода `setUp()`, который будет запускаться перед каждым тестом:
+```python
+import unittest
+
+class SimpleWidgetTestCase(unittest.TestCase):
+    def setUp(self):
+        self.widget = Widget('The widget')
+
+    def test_default_widget_size(self):
+        self.assertEqual(self.widget.size(), (50,50),
+                         'incorrect default size')
+
+    def test_widget_resize(self):
+        self.widget.resize(100,150)
+        self.assertEqual(self.widget.size(), (100,150),
+                         'wrong size after resize')
+```
+Мы также можем определить метод `tearDown()`, который будет запускаться после каждого теста:
+```python
+import unittest
+
+class SimpleWidgetTestCase(unittest.TestCase):
+    def setUp(self):
+        self.widget = Widget('The widget')
+
+    def tearDown(self):
+        self.widget.dispose()
+```
+Можно разместить все тесты в том же файле, что и сама программа (таком как `widgets.py`), но размещение тестов в отдельном файле (таком как `test_widget.py`) имеет много преимуществ:
+
+- Модуль с тестом может быть запущен автономно из командной строки.  
+- Тестовый код может быть легко отделён от программы.  
+- Меньше искушения изменить тесты для соответствия коду программы без видимой причины.  
+- Тестовый код должен изменяться гораздо реже, чем программа.  
+- Протестированный код может быть легче переработан.  
+- Тесты для модулей на C должны быть в отдельных модулях, так почему же не быть последовательным?  
+- Если стратегия тестирования изменяется, нет необходимости изменения кода программы.
+
+## Пропуск тестов и ожидаемые ошибки
+`unittest` поддерживает пропуск отдельных тестов, а также классов тестов. Вдобавок, поддерживается пометка теста как "не работает, но так и надо".
+
+Пропуск теста осуществляется использованием декоратора `skip()` или одного из его условных вариантов.
+```python
+class MyTestCase(unittest.TestCase):
+
+    @unittest.skip("demonstrating skipping")
+    def test_nothing(self):
+        self.fail("shouldn't happen")
+
+    @unittest.skipIf(mylib.__version__ < (1, 3),
+                     "not supported in this library version")
+    def test_format(self):
+        # Tests that work for only a certain version of the library.
+        pass
+
+    @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
+    def test_windows_support(self):
+        # windows specific testing code
+        pass
+```
+```bash
+test_format (__main__.MyTestCase) ... skipped 'not supported in this library version'
+test_nothing (__main__.MyTestCase) ... skipped 'demonstrating skipping'
+test_windows_support (__main__.MyTestCase) ... skipped 'requires Windows'
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.005s
+
+OK (skipped=3)
+```
+Классы также могут быть пропущены:
+```python
+@unittest.skip("showing class skipping")
+class MySkippedTestCase(unittest.TestCase):
+    def test_not_run(self):
+        pass
+```
+Ожидаемые ошибки используют декоратор expectedFailure():
+```python
+class ExpectedFailureTestCase(unittest.TestCase):
+    @unittest.expectedFailure
+    def test_fail(self):
+        self.assertEqual(1, 0, "broken")
+```
+Очень просто сделать свой декоратор. Например, следующий декоратор пропускает тест, если переданный объект не имеет указанного атрибута:
+```python
+def skipUnlessHasattr(obj, attr):
+    if hasattr(obj, attr):
+        return lambda func: func
+    return unittest.skip("{!r} doesn't have {!r}".format(obj, attr))
+```
+Декораторы, пропускающие тесты или говорящие об ожидаемых ошибках:
+
+`@unittest.skip(reason)` - пропустить тест. reason описывает причину пропуска.  
+`@unittest.skipIf(condition, reason)` - пропустить тест, если condition истинно.  
+`@unittest.skipUnless(condition, reason)` - пропустить тест, если condition ложно.  
+`@unittest.expectedFailure` - пометить тест как ожидаемая ошибка.  
+
+Для пропущенных тестов не запускаются `setUp()` и `tearDown()`. Для пропущенных классов не запускаются `setUpClass()` и `tearDownClass()`. Для пропущенных модулей не запускаются `setUpModule()` и `tearDownModule()`.
+
+## Различение итераций теста с помощью подтестов
+Когда некоторые тесты имеют лишь незначительные отличия, например некоторые параметры, `unittest` позволяет различать их внутри одного тестового метода, используя менеджер контекста `subTest()`.
+
+Например, следующий тест:
+```python
+class NumbersTest(unittest.TestCase):
+
+    def test_even(self):
+        """
+        Test that numbers between 0 and 5 are all even.
+        """
+        for i in range(0, 6):
+            with self.subTest(i=i):
+                self.assertEqual(i % 2, 0)
+```
+даст следующий отчёт:
+```bash
+======================================================================
+FAIL: test_even (__main__.NumbersTest) (i=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "subtests.py", line 32, in test_even
+    self.assertEqual(i % 2, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_even (__main__.NumbersTest) (i=3)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "subtests.py", line 32, in test_even
+    self.assertEqual(i % 2, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_even (__main__.NumbersTest) (i=5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "subtests.py", line 32, in test_even
+    self.assertEqual(i % 2, 0)
+AssertionError: 1 != 0
+```
+Без использования подтестов, выполнение будет остановлено после первой ошибки, и ошибку будет сложнее диагностировать, потому что значение `i` не будет показано:
+```bash
+======================================================================
+FAIL: test_even (__main__.NumbersTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "subtests.py", line 32, in test_even
+    self.assertEqual(i % 2, 0)
+AssertionError: 1 != 0
+```
+
+## Проверки на успешность
+Модуль `unittest` предоставляет множество функций для самых различных проверок:
+
+**`assertEqual(a, b)`** — `a == b`  
+**`assertNotEqual(a, b)`** — `a != b`  
+**`assertTrue(x)`** — `bool(x) is True`  
+**`assertFalse(x)`** — `bool(x) is False`  
+**`assertIs(a, b)`** — `a is b`  
+**`assertIsNot(a, b)`** — `a is not b`  
+**`assertIsNone(x)`** — x is None  
+**`assertIsNotNone(x)`** — x is not None  
+**`assertIn(a, b)`** — a in b  
+**`assertNotIn(a, b)`** — a not in b  
+**`assertIsInstance(a, b)`** — isinstance(a, b)  
+**`assertNotIsInstance(a, b)`** — not isinstance(a, b)  
+**`assertRaises(exc, fun, *args, **kwds) — fun(*args, **kwds)`** порождает исключение `exc`  
+**`assertRaisesRegex(exc, r, fun, *args, **kwds) — fun(*args, **kwds)`** порождает исключение exc и сообщение соответствует регулярному выражению `r`  
+**`assertWarns(warn, fun, *args, **kwds) — fun(*args, **kwds)`** порождает предупреждение  
+**`assertWarnsRegex(warn, r, fun, *args, **kwds) — fun(*args, **kwds)`** порождает предупреждение и сообщение соответствует регулярному выражению `r`  
+**`assertAlmostEqual(a, b)`** — round(a-b, 7) == 0  
+**`assertNotAlmostEqual(a, b)`** — round(a-b, 7) != 0  
+**`assertGreater(a, b)`** — a > b  
+**`assertGreaterEqual(a, b)`** — a >= b  
+**`assertLess(a, b)`** — a < b  
+**`assertLessEqual(a, b)`** — a <= b  
+**`assertRegex(s, r)`** — r.search(s)  
+**`assertNotRegex(s, r)`** — not r.search(s)  
+**`assertCountEqual(a, b)`** — a и b содержат те же элементы в одинаковых количествах, но порядок не важен
+
+# Конфигурационные объекты и фикстуры в unittest
+**Фикстуры (fixtures)** — это преднастроенные объекты, которые создаются перед тестами и очищаются после их выполнения. Они необходимы для подготовки окружения, разделяемого между тестами, чтобы обеспечить их предсказуемость и независимость.
+Зачем нужны фикстуры?
+
+    Подготовка данных и объектов для тестов:
+        Создание объектов, которые тестируемый код будет использовать.
+        Инициализация баз данных, файловых систем или внешних зависимостей.
+
+    Гарантия изоляции тестов:
+        Каждый тест запускается с "чистым листом".
+        Состояние окружения не влияет на результаты тестов.
+
+    Уменьшение дублирования:
+        Код подготовки выносится в отдельные методы, исключая повторение в каждом тесте.
+
+    Упрощение отладки:
+        Фикстуры позволяют легко воспроизводить окружение для одного теста.
+
+## **Фикстуры в unittest**
+
+Модуль unittest предоставляет несколько механизмов для работы с фикстурами:
+
+    Методы уровня модуля:
+        `setUpModule` / `tearDownModule`: выполняются один раз для всего модуля
+    Методы уровня класса:
+        `setUpClass` / `tearDownClass`: выполняются один раз для всех тестов в классе.
+    Методы уровня теста:
+        `setUp` / `tearDown`: выполняются перед и после каждого теста.
+    Ручное управление:
+        Использование контекстных менеджеров или вручную написанных методов для более сложных сценариев.
+
+## Возможные варианты использования фикстур
+### 1. Инициализация простых объектов
+
+Подготовка объектов, используемых в тестах.
+```python
+import unittest
+
+class TestMathOperations(unittest.TestCase):
+    def setUp(self):
+        self.a = 10
+        self.b = 5
+
+    def test_addition(self):
+        self.assertEqual(self.a + self.b, 15)
+
+    def test_subtraction(self):
+        self.assertEqual(self.a - self.b, 5)
+
+    def tearDown(self):
+        # Очистка или логирование (если требуется)
+        pass
+
+if __name__ == "__main__":
+    unittest.main()
+```
+### 2. Подготовка ресурсов (например, базы данных)
+
+Создание временной базы данных, таблиц, загрузка данных.
+```python
+import unittest
+import sqlite3
+
+class TestDatabase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Создаём базу данных и подключение
+        cls.connection = sqlite3.connect(":memory:")
+        cls.cursor = cls.connection.cursor()
+        cls.cursor.execute("CREATE TABLE users (id INTEGER, name TEXT)")
+
+    def setUp(self):
+        # Загружаем данные для каждого теста
+        self.cursor.execute("INSERT INTO users VALUES (1, 'Alice')")
+        self.cursor.execute("INSERT INTO users VALUES (2, 'Bob')")
+        self.connection.commit()
+
+    def test_user_count(self):
+        self.cursor.execute("SELECT COUNT(*) FROM users")
+        count = self.cursor.fetchone()[0]
+        self.assertEqual(count, 2)
+
+    def test_user_names(self):
+        self.cursor.execute("SELECT name FROM users WHERE id = 1")
+        name = self.cursor.fetchone()[0]
+        self.assertEqual(name, 'Alice')
+
+    def tearDown(self):
+        # Очищаем таблицу после каждого теста
+        self.cursor.execute("DELETE FROM users")
+        self.connection.commit()
+
+    @classmethod
+    def tearDownClass(cls):
+        # Закрываем подключение после всех тестов
+        cls.connection.close()
+
+if __name__ == "__main__":
+    unittest.main()
+```
+### 3. Тестирование файловой системы
+
+Создание временных файлов перед тестами.
+```python
+import unittest
+import os
+
+class TestFileOperations(unittest.TestCase):
+    def setUp(self):
+        # Создаём временный файл
+        self.test_file = "test.txt"
+        with open(self.test_file, 'w') as f:
+            f.write("Hello, World!")
+
+    def test_file_read(self):
+        with open(self.test_file, 'r') as f:
+            content = f.read()
+        self.assertEqual(content, "Hello, World!")
+
+    def tearDown(self):
+        # Удаляем временный файл
+        if os.path.exists(self.test_file):
+            os.remove(self.test_file)
+
+if __name__ == "__main__":
+    unittest.main()
+```
+### 4. Использование внешних зависимостей (например, API)
+
+Для интеграционного тестирования или мокирования.
+```python
+import unittest
+from unittest.mock import patch
+
+class TestExternalAPI(unittest.TestCase):
+    @patch("requests.get")
+    def test_api_response(self, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {"message": "success"}
+
+        response = mock_get("http://example.com/api")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["message"], "success")
+
+if __name__ == "__main__":
+    unittest.main()
+```
+**Почему нельзя без фикстур?**
+
+    Дублирование кода:
+        Без фикстур каждый тест будет повторять одни и те же подготовительные операции.
+
+    Неизолированные тесты:
+        Если тесты работают с общими ресурсами (например, файл, база данных), их результаты могут влиять друг на друга.
+
+    Усложнённая отладка:
+        Неподготовленное или нестабильное окружение затрудняет определение причин сбоя тестов.
+
+    Повышенный риск ошибок:
+        Без фикстур сложно обеспечить единообразное состояние для всех тестов.
+
+Фикстуры обеспечивают надёжность и простоту тестирования, особенно при работе с разделяемыми ресурсами или сложными конфигурациями. Использование фикстур позволяет создавать независимые, изолированные тесты с минимальными усилиями.
+
+## Изоляция тестов
+Изоляция тестов (на примере выше работы с БД) обеспечивается за счёт использования фикстур `setUp` и `tearDown`, а также разделения ответственности между методами `setUpClass` и `tearDownClass`.
+
+Давайте разберёмся, почему тесты в этом случае изолированы и как это достигается.  
+Ключевые элементы изоляции тестов в примере
+
+    **Разделение подготовки окружения:**
+        `setUpClass`: Выполняется один раз для всего класса, создавая общий ресурс — базу данных в памяти (`sqlite3.connect(":memory:")`). Это экономит время, так как база создаётся лишь один раз для всех тестов.
+        `setUp`: Выполняется перед каждым тестом, добавляя данные (`INSERT INTO users`). Таким образом, каждый тест запускается в идентичных условиях: база данных содержит ровно два пользователя.
+
+    Очистка состояния после теста:
+        `tearDown`: Выполняется после каждого теста, очищая таблицу от всех записей (`DELETE FROM users`). Это предотвращает влияние одного теста на другой, даже если предыдущий тест модифицировал данные.
+
+    Ручное управление ресурсами:
+        `tearDownClass`: Выполняется один раз после всех тестов, чтобы закрыть соединение с базой данных. Это освобождает ресурсы.
+
+**Где видно, что тесты изолированы?**
+
+    Инициализация данных: Каждый раз перед тестом база данных наполняется одинаковыми данными через `setUp`. Например, в обоих тестах:
+```python
+self.cursor.execute("INSERT INTO users VALUES (1, 'Alice')")
+self.cursor.execute("INSERT INTO users VALUES (2, 'Bob')")
+```
+
+Тесты никогда не "унаследуют" изменения в базе данных, сделанные другими тестами.
+
+Очищение данных: После выполнения каждого теста таблица "users" очищается:
+
+`self.cursor.execute("DELETE FROM users")`
+
+Это гарантирует, что ни один тест не оставляет "мусора" в общем ресурсе.
+
+Если убрать `tearDown` и не очищать таблицу после каждого теста, состояние базы данных будет сохраняться между тестами.  
+**Что пойдёт не так:**
+
+    Первый тест (`test_user_count`) выполняется успешно:
+        В `setUp` добавляются две записи.
+        Тест проверяет, что в таблице ровно 2 записи, и завершается.
+
+    Второй тест (`test_user_names`) ломается:
+        В `setUp` снова добавляются две записи.
+        Таблица теперь содержит 4 записи (2 от предыдущего теста + 2 новых).
+        Если тест ищет запись `id=1`, он найдёт её, но избыточные записи могут повлиять на логику теста.
+
+**Почему это важно?**
+
+    Предсказуемость результатов:
+        Каждый тест проверяет именно тот сценарий, который описан в нём, а не поведение, зависимое от предыдущих тестов.
+
+    Локализация ошибок:
+        Если тест падает, можно быть уверенным, что ошибка связана именно с ним, а не с побочным эффектом другого теста.
+
+    Масштабируемость:
+        Изолированные тесты легко выполнять параллельно, поскольку они не зависят друг от друга.
+
+Фикстуры, такие как `setUp` и `tearDown`, обеспечивают эту изоляцию.
+
+## Фикстуры уровня модуля
+
+Фикстуры уровня модуля в `unittest` необходимы, когда требуется подготовить или разделить общий ресурс, который используется всеми тестами из модуля, а не только из одного класса. Это позволяет экономить ресурсы и время, избегая многократного создания и удаления ресурса для каждого тестового класса или теста.
+
+Примером может быть работа с временной базой данных, API-сервером, файлом или другими ресурсами, которые достаточно создать один раз для всех тестов модуля.
+Пример: Использование фикстуры уровня модуля для базы данных  
+
+Задача  
+Пусть у нас есть набор тестов, которые проверяют работу с базой данных. Создавать базу для каждого класса или теста слишком дорого, так как структура базы и начальные данные одинаковы для всех тестов.  
+Мы можем использовать фикстуры уровня модуля для создания и удаления базы один раз для всех тестов.
+
+Реализация
+```python
+import unittest
+import sqlite3
+
+# Общий ресурс для модуля
+db_connection = None
+db_cursor = None
+
+def setUpModule():
+    """
+    Создаётся общий ресурс для всего модуля — временная база данных.
+    """
+    global db_connection, db_cursor
+    db_connection = sqlite3.connect(":memory:")
+    db_cursor = db_connection.cursor()
+    db_cursor.execute("CREATE TABLE users (id INTEGER, name TEXT, age INTEGER)")
+    db_cursor.execute("INSERT INTO users VALUES (1, 'Alice', 30), (2, 'Bob', 25), (3, 'Charlie', 35)")
+    db_connection.commit()
+    print("setUpModule: База данных создана.")
+
+def tearDownModule():
+    """
+    Удаляется общий ресурс после завершения всех тестов модуля.
+    """
+    global db_connection
+    db_connection.close()
+    print("tearDownModule: База данных закрыта.")
+
+class TestUserQueries(unittest.TestCase):
+    def test_user_count(self):
+        db_cursor.execute("SELECT COUNT(*) FROM users")
+        count = db_cursor.fetchone()[0]
+        self.assertEqual(count, 3)
+
+    def test_user_age(self):
+        db_cursor.execute("SELECT age FROM users WHERE name = 'Bob'")
+        age = db_cursor.fetchone()[0]
+        self.assertEqual(age, 25)
+
+class TestDatabaseModifications(unittest.TestCase):
+    def test_add_user(self):
+        db_cursor.execute("INSERT INTO users VALUES (4, 'Diana', 40)")
+        db_connection.commit()
+        db_cursor.execute("SELECT COUNT(*) FROM users")
+        count = db_cursor.fetchone()[0]
+        self.assertEqual(count, 4)
+
+    def test_delete_user(self):
+        db_cursor.execute("DELETE FROM users WHERE name = 'Alice'")
+        db_connection.commit()
+        db_cursor.execute("SELECT COUNT(*) FROM users")
+        count = db_cursor.fetchone()[0]
+        self.assertEqual(count, 2)
+
+if __name__ == "__main__":
+    unittest.main()
+```
+**Разбор кода**
+
+    Фикстура уровня модуля:
+        setUpModule создаёт ресурс (базу данных) один раз для всех тестов модуля.
+        tearDownModule освобождает ресурс (закрывает базу данных) после выполнения всех тестов.
+
+    Общий ресурс:
+        Глобальные переменные `db_connection` и `db_cursor` используются всеми тестами.
+        База данных создаётся только один раз, что экономит время.
+
+    Изоляция тестов:
+        Каждый тест может менять состояние базы данных, но это не проблема, так как структура базы данных задаётся в фикстуре модуля. В реальных сценариях вы могли бы откатить изменения после каждого теста с помощью фикстур класса (set`Up/`tearDown`).
+
+    Экономия времени:
+        Нет необходимости каждый раз пересоздавать базу данных для каждого класса или теста. Это важно, если ресурс сложный или создаётся долго.
+
+**Когда фикстуры уровня модуля обязательны?**
+
+    Ресурс сложный или тяжёлый для инициализации:
+        Например, работа с API-сервером, подключение к облачным сервисам, настройка Docker-контейнеров.
+
+    Общий ресурс для всего набора тестов:
+        Например, база данных, конфигурация приложения или большой объём данных, который используется всеми тестами.
+
+    Экономия ресурсов и времени:
+        Если создание ресурса занимает значительное время, имеет смысл делать это один раз для всего модуля.
+
+Если вы уберёте `setUpModule` и будете создавать базу в каждом классе через `setUpClass`, база данных будет создаваться несколько раз. Это приведёт к лишним затратам ресурсов и увеличению времени выполнения тестов.
+
+# Декораторы unittest
+В unittest доступны несколько полезных декораторов, которые помогают изменять поведение тестов или добавлять дополнительную информацию. Вот их список, назначение и примеры использования:
+
+1. @unittest.skip(reason)
+
+    Назначение: Пропустить тест с указанием причины.
+    Пример использования:
+    ```python
+    import unittest
+
+    class TestExample(unittest.TestCase):
+        @unittest.skip("Этот тест пока не реализован")
+        def test_placeholder(self):
+            self.assertEqual(1, 1)
+    ```
+
