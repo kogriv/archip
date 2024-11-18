@@ -2402,3 +2402,131 @@ if __name__ == "__main__":
     В сложных системах можно запускать разные группы тестов на разных этапах сборки.
 
 Этот подход позволяет гибко управлять тестами и их запуском, особенно в больших проектах с большим количеством тестовых сценариев.
+
+# Патчеры в фикстурах
+Есть юнит-тест коннектора к БД:
+```python
+class TestDataBaseFetcher(unittest.TestCase):
+    
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.sqlite'})
+    def test_connect_success(self, mock_connect):
+        db_fetcher = DataBaseFetcher(db_name='test.db', db_table='test_table')
+        db_fetcher.connect()
+        mock_connect.assert_called_once_with(db_fetcher.db_path)
+        self.assertIsNotNone(db_fetcher.conn)
+
+    @patch('datahub.fetcher.sqlite3.connect')
+    @patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.sqlite'})
+    def test_connect_failure(self, mock_connect):
+        mock_connect.side_effect = Exception("Connection error")
+        db_fetcher = DataBaseFetcher(db_name='test.db', db_table='test_table')
+        db_fetcher.connect()
+        self.assertIsNone(db_fetcher.conn)
+```
+Везде моки:
+```python
+@patch('datahub.fetcher.sqlite3.connect')
+@patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.sqlite'})
+```
+Их можно вынести в фикстуры:
+```python
+class TestDataBaseFetcher(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # Патчим переменные окружения
+        cls.env_patcher = patch.dict(
+            'os.environ',
+            {'DB_PATH': '/test/path', 'DB_NAME': 'test.sqlite', 'DB_TABLE': 'test_table'}
+        )
+        cls.env_patcher.start()
+
+        # Патчим sqlite3.connect
+        cls.sqlite_patcher = patch('datahub.fetcher.sqlite3.connect')
+        cls.mock_connect = cls.sqlite_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        # Останавливаем оба патчера
+        cls.env_patcher.stop()
+        cls.sqlite_patcher.stop()
+    
+    # остальной код - тесты
+```
+**Когда использовать фикстуру?**
+
+Использование фикстуры оправдано, если:
+
+    Все или большинство тестов в классе используют один и тот же мок.
+    Настройка мока идентична для всех тестов.
+
+**Когда лучше оставить @patch?**
+
+Оставлять `@patch` следует, если:
+
+    Разные тесты требуют уникальных настроек мока.
+    Вы хотите минимизировать область действия подмены, чтобы избежать побочных эффектов.
+
+Объяснение:
+
+    `setUpClass` для объединения патчей:
+        Переменные окружения патчатся через patch.dict и запускаются через start().
+        Метод sqlite3.connect патчится через patch и также запускается через start().
+
+    Хранение ссылок на патчеры:
+        Ссылки на патчеры (`cls.env_patcher` и `cls.sqlite_patcher`) сохраняются, чтобы их можно было остановить через `stop()` в `tearDownClass`.
+
+    Область действия моков:
+        Оба мока (`os.environ` и `sqlite3.connect`) будут активны для всех тестов в этом классе.
+
+    Изоляция тестов:
+        Если требуется настройка мока для конкретного теста (например, `side_effect`), это можно сделать внутри теста, как в примере `test_connect_failure`.
+
+Метод `tearDownClass` в классе тестов на основе `unittest` будет обязательно выполнен после завершения всех тестов в этом классе, если он переопределён. Это стандартный механизм библиотеки `unittest`, предназначенный для выполнения завершающих действий после выполнения всех тестов в данном классе.
+
+**Ключевые моменты**:
+
+    Обязательный вызов `tearDownClass`:
+        `unittest` автоматически вызывает `tearDownClass`, если тесты выполнены, либо при возникновении исключений в тестах.
+
+    Контекст выполнения:
+        `tearDownClass` вызывается только один раз, после выполнения всех тестов, принадлежащих классу. Это позволяет очистить ресурсы или остановить глобальные моки, которые были настроены в `setUpClass`.
+
+    Рекомендации:
+        Убедитесь, что в методе `tearDownClass` вызываются все действия по очистке ресурсов, созданных в `setUpClass` (например, остановка всех патчеров).
+        Если метод `tearDownClass` отсутствует, ресурсы, созданные в `setUpClass`, не будут автоматически очищены, что может привести к проблемам (например, утечке памяти, оставшимся мокам).
+
+## Порядок старта патчеров
+Порядок старта патчеров в `setUpClass` имеет значение, поскольку он влияет на то, как будут применяться моки и какие значения переменных или функций будут доступны. Если порядок старта патчеров изменён, это может изменить поведение кода внутри тестов.
+
+Декораторы в Python применяются "снизу вверх", то есть для:
+```python
+@patch('datahub.fetcher.sqlite3.connect')
+@patch.dict(os.environ, {'DB_PATH': '/test/path', 'DB_NAME': 'test.sqlite'})
+```
+Сначала применяется `patch.dict(os.environ, ...)`, а затем `patch('datahub.fetcher.sqlite3.connect')`
+
+Это значит, что:
+
+    Переменные окружения изменяются до того, как начнётся патчинг `sqlite3.connect`.
+    Код, использующий `sqlite3.connect`, будет работать с уже изменённым окружением.
+
+**Когда порядок критичен?**
+
+    Взаимосвязь между моками: Если первый мок (os.environ) влияет на поведение второго (sqlite3.connect), то порядок их применения становится критически важным.
+
+    Зависимости в тестируемом коде: Если sqlite3.connect напрямую зависит от переменных окружения, их изменение должно произойти до патчинга sqlite3.connect.
+
+## Сброс моков в фикстурах
+
+```python
+def setUp(self):
+    """
+    Set up before each test method.
+
+    Resets the mock sqlite3.connect instance and clears any side effects.
+    """
+    self.mock_connect.reset_mock()
+    self.mock_connect.side_effect = None
+```
