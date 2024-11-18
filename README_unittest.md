@@ -1,3 +1,154 @@
+# Структура библиотеки
+Библиотека `unittest` в Python является встроенным модулем, предоставляющим средства для создания и выполнения тестов. Она основана на архитектуре `xUnit`, которая широко используется в разных языках программирования.
+**Общая структура библиотеки `unittest`**
+
+Библиотека включает несколько ключевых модулей и классов, каждый из которых выполняет свою роль.
+## 1. Основной модуль: `unittest`
+
+Этот модуль предоставляет базовые классы и функции для тестирования.  
+**Основные компоненты:**
+
+    `TestCase`:
+    Базовый класс для написания тестов.
+    Методы:
+        `setUp`, `tearDown`: Подготовка и очистка перед/после каждого теста.
+        `setUpClass`, `tearDownClass`: Подготовка и очистка на уровне класса.
+        Методы утверждений (`assertEqual`, `assertTrue`, `assertRaises` и др.).
+
+    `TestSuite`:
+    Класс для объединения нескольких тестов в одну группу (набор тестов).
+
+    `TestLoader`:
+    Класс для автоматического поиска и загрузки тестов.
+
+    `TextTestRunner`:
+    Класс для выполнения тестов и вывода результатов в текстовом формате.
+
+    `TestResult`:
+    Класс для хранения результатов тестов, таких как количество успешных, неудачных и пропущенных тестов.
+
+Пример использования:
+```python
+import unittest
+
+class ExampleTest(unittest.TestCase):
+    def test_addition(self):
+        self.assertEqual(2 + 2, 4)
+
+if __name__ == "__main__":
+    unittest.main()
+```
+## 2. Модуль: `unittest.mock`
+
+Этот модуль предоставляет инструменты для создания мок-объектов и патчей. Используется для подмены зависимостей, изоляции кода и эмуляции внешних взаимодействий.  
+**Основные компоненты:**
+
+    `Mock`:
+    Класс для создания мок-объектов, которые могут имитировать поведение любых объектов.
+
+    `patch` / `patch.object`:
+    Декораторы и контекстные менеджеры для временной подмены объектов, функций или методов.
+
+    `MagicMock`:
+    Расширенная версия `Mock` с предопределёнными магическими методами (например, `__getitem__`, `__call__`).
+
+    `call`, `ANY`, `DEFAULT`:
+    Инструменты для проверки вызовов мок-объектов.
+
+Пример использования:
+```python
+from unittest.mock import Mock
+
+mock_func = Mock(return_value=42)
+result = mock_func()
+mock_func.assert_called_once()
+```
+## 3. Модуль: unittest.runner
+
+Этот модуль предоставляет классы и функции для запуска тестов.  
+**Основные компоненты:**
+
+    `TextTestRunner`:
+    Класс, который выполняет тесты и выводит результаты в текстовом формате.
+
+Пример:
+```python
+import unittest
+
+suite = unittest.TestSuite()
+suite.addTest(unittest.TestCase('test_example'))
+
+runner = unittest.TextTestRunner()
+runner.run(suite)
+```
+## 4. Модуль: unittest.result
+
+Этот модуль определяет класс TestResult, который используется для хранения результатов тестов, таких как успешные, пропущенные и провалившиеся тесты.  
+**Основные компоненты:**
+
+    `TestResult`:
+    Класс для сбора информации о результатах выполнения тестов.
+    Содержит атрибуты: `errors`, `failures`, `skipped`, `testsRun`.
+
+Пример:
+```python
+import unittest
+
+result = unittest.TestResult()
+print(result.testsRun)  # Число запущенных тестов
+```
+## 5. Модуль: unittest.suite
+
+Модуль предоставляет классы для управления тестовыми наборами.  
+**Основные компоненты:**
+
+    `TestSuite`:
+    Класс для объединения нескольких тестов в одну группу.
+
+Пример:
+```python
+import unittest
+
+suite = unittest.TestSuite()
+suite.addTest(unittest.TestCase('test_example'))
+```
+## 6. Модуль: unittest.loader
+
+Используется для автоматической загрузки тестов.
+Основные компоненты:
+
+    `TestLoader`:
+    Класс для поиска тестов по именам файлов, модулей или классов.
+
+Пример:
+```python
+loader = unittest.TestLoader()
+suite = loader.discover('.')
+```
+## 7. Модуль: unittest.signals
+
+Этот модуль предоставляет обработчики сигналов, которые позволяют корректно завершать выполнение тестов при прерывании пользователем (например, с помощью `Ctrl+C`).  
+Основные компоненты:
+
+    `installHandler`: Устанавливает обработчик сигналов.
+    `removeHandler`: Удаляет обработчик сигналов.
+
+## 8. Модуль: unittest.util
+
+Содержит вспомогательные функции для работы с unittest.  
+Основные компоненты:
+
+    `strclass`: Преобразует класс в строковое представление.
+    `safe_repr`: Создаёт безопасное строковое представление объекта.
+    `unorderable_list_difference`: Находит разницу между списками без учёта порядка.
+
+## Взаимосвязь модулей:
+
+    `unittest` (основной) использует `unittest.mock` для подмены зависимостей и `unittest.runner` для запуска тестов.
+    `unittest.loader` взаимодействует с `unittest.suite`, чтобы находить и добавлять тесты в набор.
+    `unittest.result` хранит результаты выполнения тестов и используется `unittest.runner`.
+
+
 # Тесты ннннада?
 Тесты оправданы в следующих случаях:  
 - Зависимость от внешних данных: сеть, файлы, базы данных.  
@@ -1513,9 +1664,11 @@ if __name__ == "__main__":
 Если вы уберёте `setUpModule` и будете создавать базу в каждом классе через `setUpClass`, база данных будет создаваться несколько раз. Это приведёт к лишним затратам ресурсов и увеличению времени выполнения тестов.
 
 # Декораторы unittest
-В unittest доступны несколько полезных декораторов, которые помогают изменять поведение тестов или добавлять дополнительную информацию. Вот их список, назначение и примеры использования:
+В unittest доступны несколько полезных декораторов, которые помогают изменять поведение тестов или добавлять дополнительную информацию. Вот их
 
-1. @unittest.skip(reason)
+## список, назначение и примеры использования:
+
+1. `@unittest.skip(reason)`
 
     Назначение: Пропустить тест с указанием причины.
     Пример использования:
@@ -1527,4 +1680,668 @@ if __name__ == "__main__":
         def test_placeholder(self):
             self.assertEqual(1, 1)
     ```
+2. `@unittest.skipIf(condition, reason)`
 
+    Назначение: Пропустить тест, если указанное условие выполняется.
+    Пример использования:
+    ```python
+    import unittest
+    import sys
+
+    class TestExample(unittest.TestCase):
+        @unittest.skipIf(sys.version_info < (3, 9), "Тест требует Python 3.9 или выше")
+        def test_new_feature(self):
+            self.assertTrue(True)
+    ```
+
+3. `@unittest.skipUnless(condition, reason)`
+
+    Назначение: Пропустить тест, если условие не выполняется.
+    Пример использования:
+    ```python
+    import unittest
+
+    class TestExample(unittest.TestCase):
+        @unittest.skipUnless(hasattr(str, "casefold"), "Тест требует метод 'casefold'")
+        def test_casefold(self):
+            self.assertEqual("ABC".casefold(), "abc")
+    ```
+
+4. `@unittest.expectedFailure`
+
+    Назначение: Помечает тест как ожидаемо неуспешный. Если тест неудачен, это не будет считаться ошибкой. Если тест вдруг проходит, это будет отмечено как неожиданное событие.
+    Пример использования:
+    ```python
+    import unittest
+
+    class TestExample(unittest.TestCase):
+        @unittest.expectedFailure
+        def test_failing(self):
+            self.assertEqual(1, 2)  # Ожидаем, что тест упадёт
+    ```
+
+5. `@unittest.mock.patch(target, new=None)`
+
+    Назначение: Заменяет объект указанного модуля фиктивным значением или объектом.
+    Пример использования:
+    ```python
+    import unittest
+    from unittest.mock import patch
+
+    class TestExample(unittest.TestCase):
+        @patch("builtins.print")
+        def test_mock_print(self, mock_print):
+            print("Hello, World!")
+            mock_print.assert_called_with("Hello, World!")
+    ```
+
+6. `@unittest.mock.patch.object(target, attribute, new=None)`
+
+    Назначение: Изменяет атрибут объекта фиктивным значением.
+    Пример использования:
+    ```python
+    import unittest
+    from unittest.mock import patch
+
+    class Foo:
+        def bar(self):
+            return "original"
+
+    class TestExample(unittest.TestCase):
+        @patch.object(Foo, "bar", return_value="mocked")
+        def test_patch_object(self, mock_method):
+            foo = Foo()
+            self.assertEqual(foo.bar(), "mocked")
+    ```
+
+7. `@unittest.mock.patch.dict(dictionary, values, clear=False)`
+
+    Назначение: Изменяет содержимое словаря в тесте, возвращая его в исходное состояние после выполнения теста.
+    Пример использования:
+    ```python
+    import unittest
+    from unittest.mock import patch
+
+    class TestExample(unittest.TestCase):
+        @patch.dict("os.environ", {"TEST_ENV": "mocked"})
+        def test_env(self):
+            import os
+            self.assertEqual(os.environ["TEST_ENV"], "mocked")
+    ```
+
+8. `@unittest.mock.patch.multiple(target, **kwargs)`
+
+    Назначение: Патчит несколько атрибутов объекта одновременно.
+    Пример использования:
+    ```python
+    import unittest
+    from unittest.mock import patch
+
+    class Foo:
+        attr1 = "original1"
+        attr2 = "original2"
+
+    class TestExample(unittest.TestCase):
+        @patch.multiple(Foo, attr1="mocked1", attr2="mocked2")
+        def test_patch_multiple(self):
+            self.assertEqual(Foo.attr1, "mocked1")
+            self.assertEqual(Foo.attr2, "mocked2")
+    ```
+
+9. `@unittest.expectedFailureIf(condition) (дополнительный подход)`
+
+В некоторых версиях могут быть доступны кастомные реализации на основе паттернов для expectedFailure с условием.  
+
+**Когда использовать:**
+
+    Пропуски тестов (`@skip`, `@skipIf`, `@skipUnless`):
+        Удобно для тестов, которые зависят от версии ПО, платформы или доступных ресурсов.
+
+    Ожидаемые неудачи (`@expectedFailure`):
+        Используйте для тестов, описывающих баги или функции, которые ещё не реализованы.
+
+    Моки и патчи (`@patch`, `@patch.object`, `@patch.dict`):
+        Используются для изоляции тестов от внешних зависимостей, таких как сторонние API, база данных или системные вызовы.
+
+Общий подход к созданию кастомных декораторов- логика должна быть полезной и повторяемой. Если вы часто сталкиваетесь с похожими условиями пропуска, это обоснованный повод создать кастомный декоратор.
+
+## переопределение декораторов `@skip`
+
+Переопределение декораторов вроде `@unittest.skip` и создание кастомных вариантов часто полезно для обработки сложных или динамических условий пропуска тестов. Рассмотрим несколько кейсов, где обосновано создание таких кастомных декораторов.
+
+### 1. Пропуск теста на основе конфигурации окружения
+
+Если тест зависит от переменных среды (например, API_KEY или DEBUG_MODE), можно пропустить его, если переменная не задана.
+```python
+import os
+import unittest
+
+def skipUnlessEnvVarSet(var_name):
+    if os.getenv(var_name):
+        return lambda func: func
+    return unittest.skip(f"Переменная окружения {var_name} не установлена")
+
+class TestAPI(unittest.TestCase):
+    @skipUnlessEnvVarSet("API_KEY")
+    def test_api_call(self):
+        # Тест выполняется только если API_KEY задан
+        self.assertTrue(True)
+```
+### 2. Пропуск теста в зависимости от версии Python
+
+Некоторые тесты могут работать только с определённой версией Python.
+```python
+import sys
+import unittest
+
+def skipUnlessPythonVersion(min_version):
+    if sys.version_info >= min_version:
+        return lambda func: func
+    return unittest.skip(f"Тест требует Python >= {min_version}")
+
+class TestPythonFeatures(unittest.TestCase):
+    @skipUnlessPythonVersion((3, 8))
+    def test_new_feature(self):
+        # Тест выполняется только на Python 3.8+
+        self.assertTrue(True)
+```
+### 3. Пропуск теста, если нет доступного ресурса
+
+Например, если тест зависит от доступности определённого сервиса, порта или базы данных.
+```python
+import socket
+import unittest
+
+def skipUnlessPortOpen(host, port):
+    def is_port_open():
+        try:
+            with socket.create_connection((host, port), timeout=1):
+                return True
+        except OSError:
+            return False
+
+    if is_port_open():
+        return lambda func: func
+    return unittest.skip(f"Порт {port} на {host} недоступен")
+
+class TestNetworkService(unittest.TestCase):
+    @skipUnlessPortOpen("localhost", 8080)
+    def test_service_running(self):
+        # Тест выполняется только если порт открыт
+        self.assertTrue(True)
+```
+### 4. Пропуск теста для неподдерживаемой платформы
+
+Если тест работает только на определённой операционной системе (например, Windows или Linux), его можно пропустить для других платформ.
+```python
+import unittest
+import platform
+
+def skipUnlessPlatform(target_platform):
+    if platform.system() == target_platform:
+        return lambda func: func
+    return unittest.skip(f"Тест поддерживается только на платформе {target_platform}")
+
+class TestPlatformSpecific(unittest.TestCase):
+    @skipUnlessPlatform("Windows")
+    def test_windows_functionality(self):
+        # Тест выполняется только на Windows
+        self.assertTrue(True)
+```
+### 5. Пропуск теста при отсутствии определённого атрибута
+Следующий декоратор пропускает тест, если переданный объект не имеет указанного атрибута:
+```python
+def skipUnlessHasattr(obj, attr):
+    if hasattr(obj, attr):
+        return lambda func: func
+    return unittest.skip("{!r} doesn't have {!r}".format(obj, attr))
+```
+
+### 6. Пропуск теста при наличии определённого атрибута
+
+Подобно примеру с `@skipUnlessHasattr`, но наоборот: пропустить тест, если объект имеет определённый атрибут.
+```python
+def skipIfHasattr(obj, attr):
+    if hasattr(obj, attr):
+        return unittest.skip(f"{obj!r} имеет атрибут {attr!r}")
+    return lambda func: func
+
+class SomeClass:
+    pass
+
+class TestCustom(unittest.TestCase):
+    obj = SomeClass()
+    @skipIfHasattr(obj, "forbidden_attr")
+    def test_no_forbidden_attr(self):
+        self.assertTrue(True)
+```
+
+### 7. Пропуск теста на основе состояния объекта
+
+Пропуск теста, если объект находится в определённом состоянии (например, база данных закрыта, сессия истекла).
+```python
+class Database:
+    def __init__(self, is_connected=True):
+        self.is_connected = is_connected
+
+def skipUnlessConnected(database):
+    if database.is_connected:
+        return lambda func: func
+    return unittest.skip("База данных не подключена")
+
+class TestDatabase(unittest.TestCase):
+    db = Database(is_connected=False)
+
+    @skipUnlessConnected(db)
+    def test_query(self):
+        self.assertTrue(True)
+```
+### 8. Пропуск теста на основе результата предыдущего теста
+
+Иногда тест логически связан с результатом другого теста, и его выполнение имеет смысл только при успешном завершении первого.
+```python
+def skipUnlessPreviousTestPassed(test_case, method_name):
+    if getattr(test_case, f"{method_name}_passed", False):
+        return lambda func: func
+    return unittest.skip(f"Предыдущий тест {method_name} не прошёл")
+
+class TestSequence(unittest.TestCase):
+    test_first_passed = False
+
+    def test_first(self):
+        self.test_first_passed = True
+        self.assertTrue(True)
+
+    @skipUnlessPreviousTestPassed(test_case=TestSequence, method_name="test_first")
+    def test_second(self):
+        self.assertTrue(True)
+```
+
+## переопределение декораторов `@expectedFailure`
+Декоратор `@unittest.expectedFailure` используется, чтобы отметить тесты, которые ожидаются как заведомо провальные, например, из-за известных багов или несоответствия текущим требованиям. Он помогает не засорять тестовые отчёты ненужными ошибками, пока проблема не будет исправлена.
+
+Переопределение` @expectedFailure` можно использовать для более сложных сценариев, чем просто отметка "этот тест провалится". Вот несколько более разносторонних кейсов:
+
+### 1. Условный `expectedFailure` для определённых платформ
+
+Иногда тест может проваливаться только на определённых платформах (например, Windows или macOS). Мы можем указать, что ошибка ожидается только в этих условиях.
+```python
+import unittest
+import platform
+
+def expectedFailureOnPlatform(target_platform):
+    if platform.system() == target_platform:
+        return unittest.expectedFailure
+    return lambda func: func  # Обычный тест
+
+class TestPlatformSpecific(unittest.TestCase):
+    @expectedFailureOnPlatform("Windows")
+    def test_feature(self):
+        # Проваливается только на Windows
+        self.assertEqual(1 + 1, 3)
+```
+### 2. Ожидаемый провал из-за определённой версии библиотеки
+
+Если тест проваливается в определённой версии зависимости (например, `numpy` или `pandas`), его можно пропустить до исправления.
+```python
+import unittest
+import numpy as np
+
+def expectedFailureIfVersionLessThan(module, min_version):
+    if tuple(map(int, module.__version__.split("."))) < min_version:
+        return unittest.expectedFailure
+    return lambda func: func  # Обычный тест
+
+class TestLibraryFeature(unittest.TestCase):
+    @expectedFailureIfVersionLessThan(np, (1, 21))
+    def test_numpy_feature(self):
+        # Провалится, если версия numpy < 1.21
+        self.assertTrue(False, "Функция недоступна в старых версиях")
+```
+### 3. Ожидаемый провал на основе конфигурации окружения
+
+Если тест зависит от состояния окружения (например, флаг DEBUG), можно указать, что ошибка ожидается только в этих условиях.
+```python
+import os
+import unittest
+
+def expectedFailureIfEnvVarSet(var_name):
+    if os.getenv(var_name):
+        return unittest.expectedFailure
+    return lambda func: func
+
+class TestEnvironment(unittest.TestCase):
+    @expectedFailureIfEnvVarSet("DEBUG")
+    def test_production_behavior(self):
+        # Ожидаемый провал в режиме DEBUG
+        self.assertTrue(False, "Ошибка ожидается в режиме DEBUG")
+```
+### 4. Ожидаемый провал из-за неготовой функциональности
+
+Иногда функциональность ещё не реализована, но вы пишете тест заранее (Test-Driven Development). Вы можете пометить тест как ожидаемо провальный до завершения реализации.
+```python
+def expectedFailureUntilImplemented():
+    # Удобный маркер для ожидаемого провала до реализации
+    return unittest.expectedFailure
+
+class TestFeatureDevelopment(unittest.TestCase):
+    @expectedFailureUntilImplemented()
+    def test_future_feature(self):
+        # Этот тест провалится, пока фича не реализована
+        self.assertEqual(1 + 2, 4)
+```
+### 5. Динамический expectedFailure на основе состояния базы данных
+
+Например, если известно, что определённая таблица в базе данных недоступна, можно ожидать провал.
+```python
+import unittest
+import sqlite3
+
+def expectedFailureIfTableMissing(db_connection, table_name):
+    cursor = db_connection.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+    if not cursor.fetchone():
+        return unittest.expectedFailure
+    return lambda func: func
+
+class TestDatabase(unittest.TestCase):
+    connection = sqlite3.connect(":memory:")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.connection.execute("CREATE TABLE users (id INTEGER, name TEXT)")
+
+    @expectedFailureIfTableMissing(connection, "non_existing_table")
+    def test_missing_table(self):
+        # Ожидается провал, так как таблицы нет
+        self.connection.execute("SELECT * FROM non_existing_table")
+```
+### 6. Ожидаемый провал из-за экспериментальных функций
+
+Если тест связан с экспериментальной функциональностью, его можно пометить как ожидаемо провальный, пока функция не будет протестирована и стабильна.
+```python
+def expectedFailureForExperimentalFeature():
+    # Маркер для тестов, зависящих от нестабильных функций
+    return unittest.expectedFailure
+
+class TestExperimental(unittest.TestCase):
+    @expectedFailureForExperimentalFeature()
+    def test_experimental_logic(self):
+        # Этот тест ожидаемо провалится
+        self.assertEqual(1 / 0, 0)  # Функция нестабильна
+```
+### 7. Ожидаемый провал для редких граничных случаев
+
+Если тест специально написан для проверки редкого бага, но он ещё не исправлен, его можно временно пометить.
+```python
+def expectedFailureForKnownBug(ticket_id):
+    return unittest.expectedFailure
+
+class TestKnownIssues(unittest.TestCase):
+    @expectedFailureForKnownBug(ticket_id="BUG-1234")
+    def test_known_edge_case(self):
+        # Провал ожидается из-за известного бага
+        self.assertEqual(1 / 3, 0.333)  # Ошибка округления
+```
+Принципы создания кастомных expectedFailure декораторов:
+
+    Динамическая логика. Кастомный декоратор полезен, если условие провала теста  сложно или зависит от внешних факторов (платформы, версии библиотек, окружения).  
+    Контроль обратной совместимости. Убедитесь, что условия "ожидаемого провала" чётко описаны, чтобы декоратор не помечал корректные тесты.  
+    Переход к нормальному состоянию. Используйте @expectedFailure временно: по мере устранения известных причин провала убирайте декоратор.
+
+## переопределение `@patch`
+### Частые случаи
+Переопределение: Возможно и часто бывает полезным.  
+Причина: Патчи могут быть кастомизированы для определённых нужд, например, добавления логики, обработки исключений или интеграции с другими инструментами.  
+Пример переопределения:
+```python
+from unittest.mock import patch
+
+def my_patch(target, new=None):
+    def decorator(test_func):
+        @patch(target, new)
+        def wrapper(*args, **kwargs):
+            print(f"Патч применён к {target}")
+            return test_func(*args, **kwargs)
+        return wrapper
+    return decorator
+```
+**`@unittest.mock.patch.multiple`**
+Переопределение: Можно, но редко требуется.  
+Причина: Обычно достаточно стандартного поведения, так как декоратор выполняет конкретную задачу — замену нескольких атрибутов.  
+Пример: Включение дополнительной логики:
+```python
+def my_patch_multiple(target, **kwargs):
+    def decorator(test_func):
+        @patch.multiple(target, **kwargs)
+        def wrapper(*args, **kwargs):
+            print(f"Патч применён к {target} с атрибутами {kwargs}")
+            return test_func(*args, **kwargs)
+        return wrapper
+    return decorator
+```
+### Разные варианты
+Декоратор `@patch` из модуля `unittest.mock` используется для подмены объектов или функций во время тестирования. Он позволяет временно заменять зависимости, чтобы изолировать тестируемый код от внешних факторов, таких как вызовы API, базы данных или сложная логика.  
+Примеры нестандартных или разносторонних кейсов переопределения `@patch`
+#### 1. Динамическая подмена на основе конфигурации
+Иногда нужно подменять объект или функцию только в определённых условиях, например, в зависимости от окружения.
+```python
+from unittest.mock import patch
+import os
+
+def patch_based_on_env(target, new_value, env_var):
+    if os.getenv(env_var):
+        return patch(target, new_value)
+    return lambda func: func  # Оставляем без изменений
+
+class TestEnvironmentSpecificPatch(unittest.TestCase):
+    @patch_based_on_env('os.path.exists', lambda path: True, 'TEST_ENV')
+    def test_feature(self):
+        # os.path.exists всегда возвращает True в окружении TEST_ENV
+        self.assertTrue(os.path.exists('/non/existing/path'))
+```
+#### 2. Подмена объекта только для определённых платформ
+
+Если тестируемый код ведёт себя по-разному на Windows и Linux, можно подменять зависимости только для конкретной платформы.
+```python
+import platform
+from unittest.mock import patch
+
+def patch_on_platform(target, new_value, target_platform):
+    if platform.system() == target_platform:
+        return patch(target, new_value)
+    return lambda func: func  # Без изменений
+
+class TestPlatformSpecificPatch(unittest.TestCase):
+    @patch_on_platform('os.name', 'posix', 'Windows')
+    def test_windows_behavior(self):
+        # os.name будет "posix" только на Windows
+        self.assertEqual(os.name, 'posix' if platform.system() == 'Windows' else os.name)
+```
+#### 3. Подмена функций для экспериментального кода
+
+Иногда функции или методы недоступны в текущей версии системы, но их можно замокать для тестирования новой логики.
+```python
+def patch_for_experimental(target, experimental_implementation):
+    # Подмена функций только для экспериментов
+    return patch(target, experimental_implementation)
+
+class TestExperimentalFeature(unittest.TestCase):
+    @patch_for_experimental('math.sqrt', lambda x: x ** 0.5)
+    def test_new_sqrt_logic(self):
+        # Используем экспериментальную реализацию math.sqrt
+        self.assertEqual(math.sqrt(4), 2.0)
+```
+#### 4. Подмена методов для работы с устаревшими API
+
+Если ваш тестируемый код зависит от устаревшего API, можно подменить метод, чтобы эмулировать его работу в текущей версии.
+```python
+def patch_deprecated_api(target, replacement):
+    # Подмена устаревшего API
+    return patch(target, replacement)
+
+class TestDeprecatedAPI(unittest.TestCase):
+    @patch_deprecated_api('os.getlogin', lambda: 'mock_user')
+    def test_old_api(self):
+        # Подмена os.getlogin для устаревшего вызова
+        self.assertEqual(os.getlogin(), 'mock_user')
+```
+#### 5. Автоматическая подмена всех методов модуля
+
+Если нужно подменить сразу несколько методов одного модуля, можно написать декоратор, который автоматизирует процесс.
+```python
+from unittest.mock import patch
+
+def patch_multiple(targets):
+    def decorator(func):
+        patches = [patch(target, lambda *args: 'mocked') for target in targets]
+        for p in patches:
+            p.start()
+        try:
+            return func
+        finally:
+            for p in patches:
+                p.stop()
+    return decorator
+
+class TestMultiplePatches(unittest.TestCase):
+    @patch_multiple(['os.path.exists', 'os.path.isdir'])
+    def test_multiple_patches(self):
+        # os.path.exists и os.path.isdir возвращают 'mocked'
+        self.assertEqual(os.path.exists('/any/path'), 'mocked')
+        self.assertEqual(os.path.isdir('/any/path'), 'mocked')
+```
+#### 6. Подмена вызовов с динамическими параметрами
+
+Если замена логики зависит от входных параметров, можно создать обёртку, которая определяет поведение на лету.
+```python
+from unittest.mock import patch
+
+def patch_dynamic(target, behavior_func):
+    # Замена функции на основе поведения
+    return patch(target, behavior_func)
+
+class TestDynamicBehavior(unittest.TestCase):
+    @patch_dynamic('os.getenv', lambda var: 'mock_value' if var == 'TEST' else None)
+    def test_dynamic_behavior(self):
+        # os.getenv возвращает mock_value только для переменной TEST
+        self.assertEqual(os.getenv('TEST'), 'mock_value')
+        self.assertIsNone(os.getenv('OTHER'))
+```
+#### 7. Подмена для сложных асинхронных функций
+
+Если тестируемый код использует асинхронные вызовы, можно замокать их поведение для различных сценариев.
+```python
+from unittest.mock import AsyncMock, patch
+
+def patch_async(target, return_value):
+    return patch(target, new_callable=lambda: AsyncMock(return_value=return_value))
+
+class TestAsyncBehavior(unittest.TestCase):
+    @patch_async('aiohttp.ClientSession.get', return_value='mock_response')
+    async def test_async_patch(self):
+        # aiohttp.ClientSession.get всегда возвращает mock_response
+        response = await aiohttp.ClientSession().get('http://example.com')
+        self.assertEqual(response, 'mock_response')
+```
+Принципы кастомизации `@patch`:
+
+    **Динамические условия**: Добавляйте логику проверки перед подменой (например, текущая платформа или окружение).  
+    **Управляемое поведение**: Создавайте предсказуемую подмену для случаев, где важна точная эмуляция.  
+    **Изоляция**: Убедитесь, что замена сохраняет тестируемый код изолированным от внешних зависимостей.  
+    **Поддержка асинхронности**: Используйте AsyncMock для эмуляции асинхронных функций.  
+
+Эти сценарии позволяют более гибко подстраивать тесты к различным ситуациям, сохраняя их надёжность и независимость.
+
+# Объединение тестов в TestSuite для создания сложных сценариев.
+Объединение тестов в `TestSuite` позволяет запускать несколько тестов или групп тестов вместе. Это полезно, когда нужно организовать тесты в логические группы или создать сложные сценарии выполнения.
+
+Пример объединения тестов в TestSuite
+## 1. Тесты для объединения
+
+Создадим два тестовых класса с разными наборами тестов.
+```python
+import unittest
+
+class MathTests(unittest.TestCase):
+    def test_addition(self):
+        self.assertEqual(2 + 2, 4)
+
+    def test_subtraction(self):
+        self.assertEqual(5 - 3, 2)
+
+class StringTests(unittest.TestCase):
+    def test_upper(self):
+        self.assertEqual("hello".upper(), "HELLO")
+
+    def test_isupper(self):
+        self.assertTrue("HELLO".isupper())
+        self.assertFalse("Hello".isupper())
+```
+## 2. Объединение тестов в TestSuite
+
+Создаём `TestSuite`, добавляем туда тесты вручную или используем загрузчик.
+```python
+if __name__ == "__main__":
+    # Создание экземпляра TestSuite
+    suite = unittest.TestSuite()
+
+    # Добавление тестов вручную
+    suite.addTest(MathTests("test_addition"))
+    suite.addTest(MathTests("test_subtraction"))
+    suite.addTest(StringTests("test_upper"))
+    suite.addTest(StringTests("test_isupper"))
+
+    # Запуск всех тестов в наборе
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
+```
+## 3. Автоматическое добавление тестов с TestLoader
+
+Вместо добавления тестов вручную, можно использовать `TestLoader` для автоматической загрузки всех тестов из класса или модуля.
+```python
+if __name__ == "__main__":
+    # Создаём загрузчик тестов
+    loader = unittest.TestLoader()
+
+    # Загружаем тесты из классов
+    math_tests = loader.loadTestsFromTestCase(MathTests)
+    string_tests = loader.loadTestsFromTestCase(StringTests)
+
+    # Объединяем тесты в TestSuite
+    suite = unittest.TestSuite([math_tests, string_tests])
+
+    # Запускаем все тесты
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
+```
+
+## 4. Использование метода discover
+
+`discover` автоматически находит все тесты в указанной директории.
+```python
+if __name__ == "__main__":
+    loader = unittest.TestLoader()
+    suite = loader.discover(start_dir='.', pattern="test_*.py")  # Ищет файлы, начинающиеся с test_
+
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
+```
+Зачем использовать `TestSuite`?
+
+    Управление порядком выполнения тестов:
+    Например, сначала запустить важные тесты, а затем менее критичные.
+
+    Объединение по функциональным блокам:
+    Например, тесты для базы данных, API, пользовательского интерфейса.
+
+    Изолированные сценарии:
+    Разделение больших наборов тестов на более мелкие, которые можно выполнять по отдельности.
+
+    Оптимизация тестирования:
+    Тесты можно сгруппировать для выполнения только тех, которые связаны с недавно изменённым кодом.
+
+    Интеграция в CI/CD:
+    В сложных системах можно запускать разные группы тестов на разных этапах сборки.
+
+Этот подход позволяет гибко управлять тестами и их запуском, особенно в больших проектах с большим количеством тестовых сценариев.
